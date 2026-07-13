@@ -1,0 +1,6 @@
+.layout { display: grid; grid-template-columns: 220px 1fr; gap: 50px; max-width: 980px; margin: 0 auto; padding: 0 24px; }
+.toc { position: sticky; top: 120px; align-self: start; display: flex; flex-direction: column; gap: 4px; }
+.tocItem { text-align: left; background: none; border: none; padding: 10px 14px; font-size: 13.5px; color: var(--text-dim); cursor: pointer; border-left: 2px solid transparent; }
+.tocItemOn { color: var(--lime); border-left-color: var(--lime); font-weight: 600; background: var(--lime-bg); }
+.num { font-family: var(--font-mono); color: var(--amber); font-size: 14px; margin-right: 8px; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .toc { position: static; flex-direction: row; flex-wrap: wrap; } }

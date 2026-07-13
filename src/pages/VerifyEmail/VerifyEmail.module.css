@@ -1,0 +1,48 @@
+.page {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  background: #ece7d6;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.card h2 {
+  font-family: 'Zilla Slab', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #23281f;
+  margin: 0;
+}
+
+.sub {
+  font-size: 14px;
+  color: #8c826a;
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+
+.primaryBtn {
+  margin-top: 12px;
+  padding: 13px 28px;
+  background: #35606e;
+  color: #faf8ef;
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.spin { animation: spin 0.8s linear infinite; color: #35606e; }
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,19 @@
+.hero { background: #14201f; padding: 120px 0 60px; text-align: center; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; color: #7fae9c; text-transform: uppercase; }
+.title { font-family: var(--font-display); font-size: clamp(2rem, 4.2vw, 2.9rem); color: #f4f9f6; margin: 16px 0; }
+.lead { color: rgba(244,249,246,0.65); max-width: 540px; margin: 0 auto; }
+
+.dashRow { display: grid; grid-template-columns: 280px 1fr; gap: 40px; max-width: 980px; margin: 0 auto; padding: 70px 24px; align-items: center; }
+.gaugeWrap { display: flex; flex-direction: column; align-items: center; }
+.gaugeNum { font-family: var(--font-display); font-size: 52px; font-weight: 700; color: var(--text-h); margin-top: -130px; }
+.gaugeLabel { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.metricsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.metricCard { background: var(--bg-raised); border: 1px solid var(--hairline); padding: 20px; text-align: center; }
+.metricVal { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text-h); }
+.metricLabel { font-size: 11.5px; color: var(--text-dim); font-family: var(--font-mono); text-transform: uppercase; margin-top: 4px; }
+
+.batchPanel { max-width: 700px; margin: 0 auto; background: #14201f; border: 1px solid rgba(127,174,156,0.25); padding: 30px 34px; }
+.batchRow { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-family: var(--font-mono); font-size: 13px; color: rgba(244,249,246,0.75); }
+.batchRow:last-child { border-bottom: none; }
+.riskTag { font-size: 11px; padding: 3px 10px; border-radius: 4px; font-weight: 700; }

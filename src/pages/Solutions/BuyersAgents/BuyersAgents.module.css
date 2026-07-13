@@ -1,0 +1,25 @@
+.page { background: #0f1a1e; }
+.hero { padding: 130px 0 70px; text-align: center; background: linear-gradient(160deg, #0f1a1e 0%, #16262c 100%); }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; color: #6fb3c2; text-transform: uppercase; }
+.title { font-family: var(--font-display); font-size: clamp(2rem, 4.4vw, 3rem); color: #f2f7f8; margin: 16px 0; }
+.lead { color: rgba(242,247,248,0.65); max-width: 560px; margin: 0 auto; }
+
+.compareWrap { max-width: 900px; margin: 0 auto; padding: 70px 24px; }
+.compareRow { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px; }
+.claimCell, .verifiedCell { padding: 20px 24px; }
+.claimCell { background: #1c2b30; color: rgba(242,247,248,0.5); }
+.verifiedCell { background: #163b41; color: #dff4f7; }
+.compareHead { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px; }
+.compareHead > div { padding: 14px 24px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; }
+.compareHead > div:first-child { background: #26363b; color: rgba(242,247,248,0.4); }
+.compareHead > div:last-child { background: #1d4a52; color: #6fb3c2; }
+
+.checklistWrap { background: #f2f7f8; padding: 80px 0; }
+.checklistItem { display: flex; gap: 16px; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid #d6e4e6; max-width: 700px; margin: 0 auto; }
+.checkIcon { width: 28px; height: 28px; border-radius: 50%; background: #1d4a52; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.statsBar { display: flex; justify-content: center; gap: 0; background: #16262c; }
+.statCell { flex: 1; text-align: center; padding: 40px 20px; border-right: 1px solid rgba(255,255,255,0.08); }
+.statCell:last-child { border-right: none; }
+.statVal { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: #6fb3c2; }
+.statLabel { font-family: var(--font-mono); font-size: 11px; color: rgba(242,247,248,0.5); text-transform: uppercase; margin-top: 4px; }

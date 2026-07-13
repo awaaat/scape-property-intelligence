@@ -1,0 +1,123 @@
+export const SOLUTIONS = {
+  brokers: {
+    slug: "brokers",
+    navLabel: "Brokers & Agents",
+    icon: "Building2",
+    heroImg: "/site-images/real-estate-property.jpg",
+    eyebrow: "FOR BROKERS & AGENTS",
+    title: "Close a sale with proof, not promises",
+    lead: "Hand a buyer a defensible score before they even ask for one. Real comparable sales, not a verbal comparison.",
+    color: "181, 96, 47",
+    stats: [
+      { val: "2.5x", label: "Faster closings" },
+      { val: "35%", label: "Higher conversion" },
+      { val: "1 report", label: "Replaces days of back-and-forth" },
+    ],
+    benefits: [
+      { icon: "Building2", title: "Win The Listing", text: "Show a seller you can back their asking price with real comparable sales before they even sign with you." },
+      { icon: "TrendingUp", title: "Close Faster", text: "Buyers stop stalling on price when the evidence is already in front of them." },
+      { icon: "CheckCircle", title: "Look More Credible", text: "A branded report handed to a buyer reads very differently than a verbal comparison." },
+    ],
+    splitImg: "/site-images/gallery-1.jpeg",
+    bannerImg: "/site-images/hero-im-1.jpg",
+    bannerLine: "Every report you hand a buyer is backed by real, verifiable sales data — not your word against theirs.",
+    process: [
+      { title: "Drop the pin while you're with the client", desc: "No back-office turnaround — score the plot on your phone, on site." },
+      { title: "Show them the score on the spot", desc: "Comparable sales, risk flags, and amenities, all labeled and explained." },
+      { title: "Close before they shop the comparison themselves", desc: "A buyer with proof in hand negotiates faster, not slower." },
+    ],
+    testimonial: { quote: "A buyer used to ask me to prove a plot was worth the price. Now I hand them a report before they even ask, and it closes the deal faster.", name: "Brian Mwangi", role: "Independent Broker, Ruiru, Kiambu County" },
+  },
+
+  "buyers-agents": {
+    slug: "buyers-agents",
+    navLabel: "Buyer's Agents",
+    icon: "ShieldCheck",
+    heroImg: "/site-images/image-hero-3.jpeg",
+    eyebrow: "FOR BUYER'S AGENTS",
+    title: "Protect your client before they sign",
+    lead: "Verify a seller's claims against real transaction data and risk flags before your client commits.",
+    color: "47, 90, 102",
+    stats: [
+      { val: "98%", label: "Accuracy on comparable sales" },
+      { val: "30+", label: "Risk factors checked" },
+      { val: "0", label: "Guesswork on price claims" },
+    ],
+    benefits: [
+      { icon: "ShieldCheck", title: "Verify Before They Commit", text: "Check a seller's asking price against real nearby transactions, not their word." },
+      { icon: "MapPin", title: "Catch What A Walkthrough Misses", text: "Flood zones, terrain issues, and access problems that don't show up on a viewing." },
+      { icon: "Award", title: "Defend Your Advice", text: "Give your client a report they can point to if they ever ask why you recommended it." },
+    ],
+    splitImg: "/site-images/hero-im.jpeg",
+    bannerImg: "/site-images/hero-im-2.avif",
+    bannerLine: "Catch what a walkthrough can't show you — before your client's money is on the line.",
+    process: [
+      { title: "Get the listing's exact pin", desc: "From the listing link or a dropped pin, not a rough neighborhood guess." },
+      { title: "Run it against real transaction history", desc: "See if the asking price actually matches what similar plots sold for." },
+      { title: "Flag it before contracts, not after", desc: "Risk factors surface in the report, not in a dispute six months later." },
+    ],
+    testimonial: { quote: "Our 300 unit portfolio now flags a problem the week it shows up, instead of waiting for the annual audit to catch it.", name: "Joshua DuBois", role: "Portfolio Manager, Aerocast LLC" },
+  },
+
+  lenders: {
+    slug: "lenders",
+    navLabel: "Banks & Lenders",
+    icon: "Landmark",
+    heroImg: "/site-images/FI-open-house-apps.jpg",
+    eyebrow: "FOR BANKS & LENDERS",
+    title: "Check collateral before you approve",
+    lead: "Score the land backing a loan application in seconds, with every factor in the score labeled.",
+    color: "35, 60, 60",
+    stats: [
+      { val: "40%", label: "Faster approvals" },
+      { val: "15%", label: "Lower default rate" },
+      { val: "<2 sec", label: "Per collateral check" },
+    ],
+    benefits: [
+      { icon: "Landmark", title: "Score Collateral Instantly", text: "Run a check on the land backing an application without waiting on a manual valuation." },
+      { icon: "TrendingUp", title: "Price Risk Into The Loan", text: "See flood, terrain, and access risk factors before you set terms, not after." },
+      { icon: "CheckCircle", title: "Standardize Every Check", text: "The same scoring model runs on every application, so approvals aren't inconsistent branch to branch." },
+    ],
+    splitImg: "/site-images/image-1-hero.png",
+    bannerImg: "/site-images/37025.jpeg",
+    bannerLine: "The same standardized score, run on every application, branch to branch.",
+    process: [
+      { title: "Submit the collateral address", desc: "One pin, or upload a batch of pending applications at once." },
+      { title: "Get a labeled risk breakdown", desc: "Every factor that raised or lowered the score is shown, not buried." },
+      { title: "Price the loan with the data in hand", desc: "Terms reflect actual risk, not a branch officer's best guess." },
+    ],
+    testimonial: { quote: "The data is reliable, it arrives fast, and the team behind it actually understands real estate, not just software.", name: "Omar AlQabandi", role: "CEO, BilBio Kuwait" },
+  },
+
+  legal: {
+    slug: "legal",
+    navLabel: "Lawyers & Surveyors",
+    icon: "Award",
+    heroImg: "/site-images/land-prop-images.jpeg",
+    eyebrow: "FOR LAWYERS & SURVEYORS",
+    title: "Back up due diligence with real data",
+    lead: "Strengthen title and valuation due diligence with verified comparable sales and risk data.",
+    color: "90, 70, 40",
+    stats: [
+      { val: "5x", label: "More thorough than manual checks" },
+      { val: "2x", label: "Faster due diligence" },
+      { val: "12+", label: "Sources cross-referenced" },
+    ],
+    benefits: [
+      { icon: "Award", title: "Strengthen Your File", text: "Attach a data-backed valuation report alongside title verification, not just a legal opinion." },
+      { icon: "MapPin", title: "Cross-Check Survey Data", text: "Compare boundary and access data against independent sources before you sign off." },
+      { icon: "ShieldCheck", title: "Flag Risk Early", text: "Surface flood zone and terrain risk before it becomes a dispute post-sale." },
+    ],
+    splitImg: "/site-images/real-estate-im-1.jpeg",
+    bannerImg: "/site-images/gallery-2.jpeg",
+    bannerLine: "A data-backed report attached to your file, not just a legal opinion standing alone.",
+    process: [
+      { title: "Pull the plot's exact pin", desc: "From the title deed reference or a dropped map location." },
+      { title: "Cross-check against independent data", desc: "Comparable sales and access data, sourced separately from the seller's claims." },
+      { title: "Attach it to your due diligence file", desc: "One document that backs your opinion with numbers, not just judgment." },
+    ],
+    testimonial: { quote: "Showing buyers a clear, honest score on every listing made them trust us more, and we started getting more inquiries because of it.", name: "Pedro Madeira Gomes", role: "CEO, GoGuess, Portugal" },
+  },
+};
+
+export const SOLUTIONS_LIST = Object.values(SOLUTIONS);

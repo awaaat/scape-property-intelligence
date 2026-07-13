@@ -1,0 +1,9 @@
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+.card { background: var(--bg-raised); border: 1px solid var(--hairline); padding: 30px 26px; position: relative; overflow: hidden; min-height: 200px; }
+.card h3 { font-family: var(--font-display); font-size: 17px; color: var(--text-h); margin: 14px 0 8px; }
+.cardBase { font-size: 13.5px; color: var(--text-dim); }
+.cardWhy {
+  position: absolute; inset: 0; background: var(--lime); color: #faf8ef; padding: 26px;
+  display: flex; align-items: center; font-size: 13.5px; line-height: 1.6;
+}
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }

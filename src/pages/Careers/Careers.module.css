@@ -1,0 +1,31 @@
+.hero { background: #1f1710; position: relative; padding: 110px 0 80px; text-align: center; overflow: hidden; }
+.heroImg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.35; }
+.heroInner { position: relative; z-index: 1; }
+.kicker { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; color: #e8a166; text-transform: uppercase; }
+.title { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.8rem); color: #fff8ec; margin: 16px 0; }
+.lead { color: rgba(255,248,236,0.7); max-width: 520px; margin: 0 auto; }
+
+.valuesRow { display: flex; gap: 28px; justify-content: center; flex-wrap: wrap; padding: 80px 24px; }
+.valueCard {
+  background: var(--bg-raised);
+  border: 1px solid var(--hairline);
+  padding: 30px 26px;
+  width: 240px;
+  box-shadow: var(--shadow);
+}
+.valueCard:nth-child(1) { transform: rotate(-2deg); }
+.valueCard:nth-child(2) { transform: rotate(1.5deg); }
+.valueCard:nth-child(3) { transform: rotate(-1deg); }
+.valueCard h3 { font-family: var(--font-display); font-size: 17px; margin: 14px 0 6px; color: var(--text-h); }
+.valueCard p { font-size: 13.5px; color: var(--text-dim); margin: 0; }
+
+.rolesWrap { background: #1f1710; padding: 70px 0 90px; }
+.roleItem {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 22px 0;
+  cursor: pointer;
+}
+.roleTop { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.roleTitle { font-family: var(--font-display); font-size: 18px; color: #fff8ec; }
+.roleTag { font-family: var(--font-mono); font-size: 11px; color: #e8a166; border: 1px solid rgba(232,161,102,0.4); padding: 3px 10px; }
+.roleMeta { color: rgba(255,248,236,0.5); font-size: 13px; margin-top: 6px; }

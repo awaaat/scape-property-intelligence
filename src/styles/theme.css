@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #ece7d6;
+  --bg-raised: #faf8ef;
+  --surface: #e3ddc5;
+  --surface-2: #d7cfb1;
+  --hairline: #c7bd9a;
+  --hairline-soft: #d9d1b3;
+  --text: #4d4835;
+  --text-dim: #8c826a;
+  --text-h: #23281f;
+  --lime: #35606e;
+  --lime-bg: rgba(53, 96, 110, 0.12);
+  --amber: #b5602f;
+  --amber-bg: rgba(181, 96, 47, 0.12);
+  --cyan: #2f5a66;
+  --red: #a6402e;
+  --shadow: rgba(35, 40, 31, 0.1) 0 20px 50px -10px;
+  --shadow-hover: rgba(35, 40, 31, 0.18) 0 30px 60px -15px;
+  --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Zilla Slab', Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}

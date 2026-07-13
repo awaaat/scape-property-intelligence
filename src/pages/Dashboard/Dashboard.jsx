@@ -1,0 +1,727 @@
+// src/pages/dashboard/Dashboard.jsx
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  LayoutDashboard, Home, BarChart2, Users, Settings, LogOut,
+  ChevronLeft, ChevronRight, Search, Bell, MessageSquare,
+  User, Plus, ArrowUp, ArrowDown, Eye, Download, Filter,
+  Calendar, Clock, CheckCircle, AlertCircle, X, Menu,
+  MapPin, TrendingUp, TrendingDown, DollarSign, Activity,
+  PieChart, LineChart, FileText, Star, Zap, Shield, Award,
+  Briefcase, Landmark, Building2, ChevronDown, ChevronUp,
+  Loader2, RefreshCw, ExternalLink, Copy, Share2, MoreVertical, Phone, Gift
+} from "lucide-react";
+import styles from "./Dashboard.module.css";
+import api, { tokenStorage } from "../../api/client";
+import { logout as apiLogout } from "../../api/auth";
+import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, requestOTP, verifyOTP } from "../../api/billing";
+import { getDeviceFingerprint } from "../../utils/deviceId";
+
+// ─── ANIMATION VARIANTS (same as before) ──────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
+};
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.4, type: "spring", stiffness: 200 } }
+};
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
+};
+
+// ─── SUB-COMPONENTS ─────────────────────────────────────────────────────
+const StatCard = ({ stat }) => (
+  <motion.div className={styles.statCard} variants={scaleIn} whileHover={{ y: -6 }}>
+    <div className={styles.statIcon} style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
+      {stat.icon}
+    </div>
+    <div className={styles.statContent}>
+      <span className={styles.statValue}>{stat.value}</span>
+      <span className={styles.statLabel}>{stat.label}</span>
+    </div>
+    {stat.change && (
+      <div className={`${styles.statChange} ${stat.change.startsWith('+') ? styles.statChangePositive : styles.statChangeNegative}`}>
+        {stat.change}
+      </div>
+    )}
+  </motion.div>
+);
+
+const ReportRow = ({ report, onClick }) => {
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'ready': return '#2e7d32';
+      case 'pending': return '#ed6c02';
+      case 'generating': return '#0288d1';
+      case 'failed': return '#d32f2f';
+      default: return '#757575';
+    }
+  };
+
+  return (
+    <motion.div
+      className={styles.propertyRow}
+      variants={fadeUp}
+      whileHover={{ backgroundColor: "#f8f9fa" }}
+      onClick={() => onClick(report)}
+    >
+      <div className={styles.propertyCell}>
+        <div className={styles.propertyAddress}>
+          <MapPin size={14} className={styles.propertyPin} />
+          <span>{report.address}</span>
+        </div>
+      </div>
+      <div className={styles.propertyCell}>
+        <div className={styles.propertyScore}>
+          <span className={styles.scoreNumber}>{report.score ?? "—"}</span>
+        </div>
+      </div>
+      <div className={styles.propertyCell}>
+        <span className={styles.propertyStatus} style={{ color: getStatusColor(report.status) }}>
+          {(report.status === "pending" || report.status === "generating") && (
+            <Loader2 size={13} className={styles.spinIcon} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+          )}
+          {report.status_display}
+        </span>
+      </div>
+      <div className={styles.propertyCell}>
+        <span className={styles.propertyDate}>{report.created_at_display}</span>
+      </div>
+      <div className={styles.propertyCell}>
+        <button className={styles.viewBtn} onClick={(e) => { e.stopPropagation(); onClick(report); }}>
+          <Eye size={16} />
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+// ─── MAIN DASHBOARD ──────────────────────────────────────────────────────
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [userName, setUserName] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [usage, setUsage] = useState(null);
+
+  // ─── OTP modal state ────────────────────────────────────────────
+  const [otpModal, setOtpModal] = useState(null); // { reportId, fingerprintHash, step: "phone"|"code", phoneNumber }
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState(null);
+  const [otpSubmitting, setOtpSubmitting] = useState(false);
+
+  // ─── Fetch reports ──────────────────────────────────────────────────
+  const fetchReports = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchReportsApi();
+      setReports(data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+      setError(err.response?.data?.detail || "Failed to load reports.");
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Check authentication
+    const token = tokenStorage.getAccess();
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    fetchReports();
+    fetchMyUsage().then(setUsage).catch(() => {});
+    // Fetch user info (optional)
+    api.get("/users/me/").then(({ data }) => {
+      setUserName(data.full_name || "User");
+    }).catch(() => {});
+  }, []);
+
+  // ─── Live polling while any report is pending/generating ───────────
+  useEffect(() => {
+    const hasPending = reports.some(
+      (r) => r.status === "pending" || r.status === "generating"
+    );
+    if (!hasPending) return;
+
+    const interval = setInterval(async () => {
+      setIsRefreshing(true);
+      await fetchReports({ silent: true });
+      await fetchMyUsage().then(setUsage).catch(() => {});
+      setIsRefreshing(false);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [reports]);
+
+  // ─── Stats ──────────────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    const total = reports.length;
+    const scores = reports.map(r => r.score).filter(s => s !== null);
+    const avgScore = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
+    const ready = reports.filter(r => r.status === "ready").length;
+    const pending = reports.filter(r => r.status === "pending" || r.status === "generating").length;
+    const failed = reports.filter(r => r.status === "failed").length;
+    return { total, avgScore, ready, pending, failed };
+  }, [reports]);
+
+  // ─── Filtered reports ──────────────────────────────────────────────
+  const filteredReports = useMemo(() => {
+    if (!searchQuery.trim()) return reports;
+    return reports.filter(r =>
+      r.address.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [reports, searchQuery]);
+
+  // ─── Handlers ──────────────────────────────────────────────────────
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchReports({ silent: true });
+    setIsRefreshing(false);
+  };
+
+  const handleLogout = async () => {
+    await apiLogout();
+    navigate("/login");
+  };
+
+  const [checkStatusMessage, setCheckStatusMessage] = useState(null);
+  const [checkSubmitting, setCheckSubmitting] = useState(false);
+
+  const handleQuickCheck = async (address) => {
+    setCheckSubmitting(true);
+    setCheckStatusMessage(null);
+    try {
+      const fingerprintHash = await getDeviceFingerprint();
+      // Logged-in dashboard user's own email, never a placeholder — the
+      // backend links this submission to the logged-in Broker/User via
+      // the JWT already attached by api/client.js's interceptor.
+      let email = localStorage.getItem("user_email");
+      if (!email) {
+        try {
+          const { data } = await api.get("/users/me/");
+          email = data.email;
+          if (email) localStorage.setItem("user_email", email);
+        } catch {
+          // fall through — backend will reject with 400 if email truly missing
+        }
+      }
+
+      const response = await submitPin({ rawInput: address, email, fingerprintHash });
+      const body = response.data;
+
+      if (response.status === 201) {
+        setCheckStatusMessage({ type: "success", text: "Report queued — it'll appear below shortly." });
+        fetchReports({ silent: true });
+        setTimeout(() => setCheckStatusMessage(null), 6000);
+      } else if (response.status === 200 && body.requires_otp) {
+        setOtpModal({ reportId: body.report_id, fingerprintHash, step: "phone", phoneNumber: "" });
+        setCheckStatusMessage(null);
+      } else if (response.status === 202) {
+        setCheckStatusMessage({ type: "info", text: body.message || "Held for manual review." });
+      }
+    } catch (err) {
+      const status = err.response?.status;
+      const body = err.response?.data;
+
+      if (status === 402 && body?.checkout_url) {
+        // Free tier exhausted — send the browser to Paystack's checkout.
+        // Persist the report id so /payment/callback can poll the right
+        // report once the payer returns.
+        sessionStorage.setItem("pending_report_id", body.report_id);
+        window.location.href = body.checkout_url;
+        return;
+      } else if (status === 403) {
+        setCheckStatusMessage({ type: "error", text: body?.error || "This device has been blocked." });
+      } else {
+        setCheckStatusMessage({ type: "error", text: body?.error || "Submission failed. Please try again." });
+      }
+    } finally {
+      setCheckSubmitting(false);
+    }
+  };
+
+  // ─── OTP handlers ──────────────────────────────────────────────────
+  const handleOtpRequestCode = async (e) => {
+    e.preventDefault();
+    setOtpError(null);
+    setOtpSubmitting(true);
+    try {
+      await requestOTP({ fingerprintHash: otpModal.fingerprintHash, phoneNumber: otpModal.phoneNumber });
+      setOtpModal((m) => ({ ...m, step: "code" }));
+    } catch (err) {
+      setOtpError(err.response?.data?.error || "Could not send code. Please try again.");
+    } finally {
+      setOtpSubmitting(false);
+    }
+  };
+
+  const handleOtpVerifyCode = async (e) => {
+    e.preventDefault();
+    setOtpError(null);
+    setOtpSubmitting(true);
+    try {
+      const response = await verifyOTP({
+        fingerprintHash: otpModal.fingerprintHash,
+        phoneNumber: otpModal.phoneNumber,
+        code: otpCode,
+        reportId: otpModal.reportId,
+      });
+      if (response.status === 402) {
+        const body = response.data;
+        if (body.checkout_url) {
+          sessionStorage.setItem("pending_report_id", body.report_id);
+          window.location.href = body.checkout_url;
+          return;
+        }
+      }
+      setOtpModal(null);
+      setOtpCode("");
+      setCheckStatusMessage({ type: "success", text: "Verified! Your report is being generated." });
+      fetchReports();
+    } catch (err) {
+      const status = err.response?.status;
+      const body = err.response?.data;
+      if (status === 402 && body?.checkout_url) {
+        sessionStorage.setItem("pending_report_id", body.report_id);
+        window.location.href = body.checkout_url;
+        return;
+      }
+      setOtpError(body?.error || "Incorrect code. Please try again.");
+    } finally {
+      setOtpSubmitting(false);
+    }
+  };
+
+  const closeOtpModal = () => {
+    setOtpModal(null);
+    setOtpCode("");
+    setOtpError(null);
+  };
+
+  // ─── Report action handlers ─────────────────────────────────────────
+  const handleViewPdf = (report) => {
+    if (report.pdf_storage_path) {
+      window.open(report.pdf_storage_path, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleShare = async (report) => {
+    const shareUrl = `${window.location.origin}/dashboard?report=${report.id}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCheckStatusMessage({ type: "success", text: "Link copied to clipboard." });
+    } catch {
+      setCheckStatusMessage({ type: "error", text: "Could not copy link." });
+    }
+  };
+
+  const handleExport = () => {
+    if (filteredReports.length === 0) return;
+    const headers = ["Address", "Score", "Status", "Free Tier", "Paid", "Created"];
+    const rows = filteredReports.map((r) => [
+      r.address, r.score ?? "", r.status_display, r.is_free_tier ? "Yes" : "No", r.is_paid ? "Yes" : "No", r.created_at_display,
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `scape-reports-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // ─── RENDER ────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className={styles.loadingOverlay}>
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+          <Loader2 size={40} color="#b5602f" />
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.dashboard}>
+      {/* ─── SIDEBAR ─── */}
+      <motion.aside
+        className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : styles.sidebarClosed}`}
+        initial={false}
+        animate={{ x: sidebarOpen ? 0 : -220 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className={styles.sidebarBrand}>
+          <Link to="/" className={styles.sidebarLogo}>
+            <span>Scape</span>
+            <em>Property Intelligence</em>
+          </Link>
+          <button className={styles.sidebarToggle} onClick={() => setSidebarOpen(!sidebarOpen)}>
+            {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          </button>
+        </div>
+
+        <nav className={styles.sidebarNav}>
+          {[
+            { icon: <LayoutDashboard size={20} />, label: "Overview", id: "overview" },
+            { icon: <Home size={20} />, label: "Reports", id: "reports" },
+            { icon: <BarChart2 size={20} />, label: "Analytics", id: "analytics" },
+            { icon: <Settings size={20} />, label: "Settings", id: "settings" },
+          ].map((item) => (
+            <motion.button
+              key={item.id}
+              className={`${styles.sidebarLink} ${activeTab === item.id ? styles.sidebarLinkActive : ''}`}
+              onClick={() => setActiveTab(item.id)}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {item.icon}
+              <span className={styles.sidebarLabel}>{item.label}</span>
+            </motion.button>
+          ))}
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <button className={styles.sidebarLink} onClick={handleLogout}>
+            <LogOut size={20} />
+            <span className={styles.sidebarLabel}>Logout</span>
+          </button>
+          <div className={styles.sidebarUser}>
+            <div className={styles.userAvatar}>{userName.charAt(0).toUpperCase()}</div>
+            {sidebarOpen && (
+              <div className={styles.userInfo}>
+                <span className={styles.userName}>{userName}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.aside>
+
+      {/* ─── MAIN CONTENT ─── */}
+      <motion.main
+        className={`${styles.mainContent} ${!sidebarOpen ? styles.mainContentFull : ''}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        {/* ─── TOP BAR ─── */}
+        <header className={styles.topBar}>
+          <div className={styles.topBarLeft}>
+            <button className={styles.menuBtn} onClick={() => setSidebarOpen(!sidebarOpen)}>
+              <Menu size={22} />
+            </button>
+            <h1 className={styles.pageTitle}>
+              {activeTab === "overview" && "Dashboard Overview"}
+              {activeTab === "reports" && "My Reports"}
+              {activeTab === "analytics" && "Analytics"}
+              {activeTab === "settings" && "Settings"}
+            </h1>
+          </div>
+          <div className={styles.topBarRight}>
+            <div className={styles.searchBar}>
+              <Search size={16} className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search reports..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={styles.searchInput}
+              />
+            </div>
+            <button className={styles.refreshBtn} onClick={handleRefresh} disabled={isRefreshing}>
+              <motion.div
+                animate={{ rotate: isRefreshing ? 360 : 0 }}
+                transition={isRefreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0.2 }}
+              >
+                <RefreshCw size={18} />
+              </motion.div>
+            </button>
+            <div className={styles.userMenu}>
+              <div className={styles.userAvatarSmall}>{userName.charAt(0).toUpperCase()}</div>
+            </div>
+          </div>
+        </header>
+
+        {/* ─── OVERVIEW TAB ─── */}
+        {activeTab === "overview" && (
+          <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
+            {/* Stats Grid */}
+            <div className={styles.statsGrid}>
+              <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={20} />, color: "#8a4522" }} />
+              <StatCard stat={{ label: "Total Reports", value: stats.total, icon: <FileText size={20} />, color: "#35606e" }} />
+              <StatCard stat={{ label: "Average Score", value: stats.avgScore, icon: <BarChart2 size={20} />, color: "#b5602f" }} />
+              <StatCard stat={{ label: "Ready", value: stats.ready, icon: <CheckCircle size={20} />, color: "#2e7d32" }} />
+              <StatCard stat={{ label: "Pending", value: stats.pending, icon: <Clock size={20} />, color: "#ed6c02" }} />
+            </div>
+
+            {/* Quick Check */}
+            <motion.div className={styles.quickCheck} variants={fadeUp}>
+              <div className={styles.quickCheckContent}>
+                <div className={styles.quickCheckText}>
+                  <h3>Check a new property</h3>
+                  <p>Enter an address or paste a Google Maps link</p>
+                </div>
+                <div className={styles.quickCheckInput}>
+                  <input
+                    type="text"
+                    placeholder="Enter address or Google Maps link..."
+                    className={styles.quickCheckField}
+                    id="quickCheckInput"
+                  />
+                  <motion.button
+                    className={styles.quickCheckBtn}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    disabled={checkSubmitting}
+                    onClick={() => {
+                      const input = document.getElementById("quickCheckInput");
+                      if (input.value.trim()) handleQuickCheck(input.value.trim());
+                    }}
+                  >
+                    <Search size={16} />
+                    <span>{checkSubmitting ? "Checking..." : "Analyze"}</span>
+                  </motion.button>
+                </div>
+                {checkStatusMessage && (
+                  <p className={`${styles.checkStatus} ${
+                    checkStatusMessage.type === "error" ? styles.checkStatusError :
+                    checkStatusMessage.type === "success" ? styles.checkStatusSuccess :
+                    styles.checkStatusInfo
+                  }`}>
+                    {checkStatusMessage.text}
+                  </p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Recent Reports */}
+            <motion.div className={styles.activityCard} variants={fadeUp}>
+              <div className={styles.cardHeader}>
+                <h4>Recent Reports</h4>
+                <button className={styles.viewAllBtn} onClick={() => setActiveTab("reports")}>View All</button>
+              </div>
+              {reports.length === 0 ? (
+                <p className={styles.emptyState}>No reports yet. Check a property to get started.</p>
+              ) : (
+                <div className={styles.activityList}>
+                  {reports.slice(0, 5).map((report) => (
+                    <div key={report.id} className={styles.activityItem} onClick={() => setSelectedReport(report)}>
+                      <div className={styles.activityIcon}>
+                        {(report.status === "pending" || report.status === "generating")
+                          ? <Loader2 size={14} className={styles.spinIcon} />
+                          : <FileText size={14} />}
+                      </div>
+                      <div className={styles.activityContent}>
+                        <span className={styles.activityText}>
+                          <strong>{report.address}</strong> – {report.status_display}
+                        </span>
+                        <span className={styles.activityTime}>{report.created_at_display}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ─── REPORTS TAB ─── */}
+        {activeTab === "reports" && (
+          <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
+            <div className={styles.propertiesHeader}>
+              <div className={styles.propertiesHeaderLeft}>
+                <h2 className={styles.propertiesTitle}>My Reports</h2>
+                <span className={styles.propertiesCount}>{filteredReports.length} reports</span>
+              </div>
+              <div className={styles.propertiesHeaderRight}>
+                <button className={styles.exportBtn} onClick={handleExport}><Download size={16} /> Export</button>
+              </div>
+            </div>
+            <div className={styles.propertiesTable}>
+              <div className={styles.tableHeader}>
+                <span>Property</span>
+                <span>Score</span>
+                <span>Status</span>
+                <span>Date</span>
+                <span>Action</span>
+              </div>
+              <div className={styles.tableBody}>
+                {filteredReports.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <p>No reports found.</p>
+                  </div>
+                ) : (
+                  filteredReports.map((report) => (
+                    <ReportRow key={report.id} report={report} onClick={() => setSelectedReport(report)} />
+                  ))
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Placeholder tabs */}
+        {["analytics", "settings"].includes(activeTab) && (
+          <div className={styles.placeholderContent}>
+            <div className={styles.placeholderIcon}>
+              {activeTab === "analytics" ? <PieChart size={48} /> : <Settings size={48} />}
+            </div>
+            <h3>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+            <p>This section is under development. Check back soon!</p>
+          </div>
+        )}
+      </motion.main>
+
+      {/* ─── REPORT DETAIL SIDEBAR ─── */}
+      <AnimatePresence>
+        {selectedReport && (
+          <motion.aside
+            className={styles.detailSidebar}
+            initial={{ x: 400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 400, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className={styles.detailHeader}>
+              <h4>Report Details</h4>
+              <button className={styles.detailClose} onClick={() => setSelectedReport(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className={styles.detailBody}>
+              <div className={styles.detailAddress}>
+                <MapPin size={18} className={styles.detailPin} />
+                <span>{selectedReport.address}</span>
+              </div>
+              <div className={styles.detailScoreSection}>
+                <div className={styles.detailScoreBig}>{selectedReport.score ?? "—"}</div>
+                <div className={styles.detailScoreLabel}>Investment Score</div>
+              </div>
+              <div className={styles.detailGrid}>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Status</span>
+                  <span className={styles.detailValue}>{selectedReport.status_display}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Free Tier</span>
+                  <span className={styles.detailValue}>{selectedReport.is_free_tier ? "Yes" : "No"}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Paid</span>
+                  <span className={styles.detailValue}>{selectedReport.is_paid ? "Yes" : "No"}</span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Created</span>
+                  <span className={styles.detailValue}>{selectedReport.created_at_display}</span>
+                </div>
+              </div>
+              <div className={styles.detailActions}>
+                {selectedReport.status === "ready" && selectedReport.pdf_storage_path && (
+                  <button className={styles.detailActionBtn} onClick={() => handleViewPdf(selectedReport)}>
+                    <Eye size={16} /> View PDF
+                  </button>
+                )}
+                <button className={styles.detailActionBtn} onClick={() => handleShare(selectedReport)}>
+                  <Share2 size={16} /> Share
+                </button>
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* ─── OTP VERIFICATION MODAL ─── */}
+      <AnimatePresence>
+        {otpModal && (
+          <motion.div
+            style={{ position: "fixed", inset: 0, background: "rgba(15,32,39,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeOtpModal}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <Phone size={20} color="#b5602f" />
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Verify your phone</h3>
+              </div>
+              <p style={{ fontSize: 13, color: "#6c757d", marginBottom: 20 }}>
+                {otpModal.step === "phone"
+                  ? "We need to confirm your number before generating this report."
+                  : `Enter the code sent to ${otpModal.phoneNumber}.`}
+              </p>
+
+              {otpError && (
+                <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", background: "rgba(211,47,47,0.08)", border: "1px solid #d32f2f", color: "#d32f2f", fontSize: 13, borderRadius: 8, marginBottom: 16 }}>
+                  <AlertCircle size={16} /> {otpError}
+                </div>
+              )}
+
+              {otpModal.step === "phone" ? (
+                <form onSubmit={handleOtpRequestCode}>
+                  <input
+                    type="tel"
+                    required
+                    autoFocus
+                    placeholder="0712345678"
+                    value={otpModal.phoneNumber}
+                    onChange={(e) => setOtpModal((m) => ({ ...m, phoneNumber: e.target.value }))}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #e9ecef", fontSize: 14, marginBottom: 16, boxSizing: "border-box" }}
+                  />
+                  <button type="submit" disabled={otpSubmitting} className={styles.quickCheckBtn} style={{ width: "100%", justifyContent: "center", background: "#b5602f" }}>
+                    {otpSubmitting ? "Sending..." : "Send code"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleOtpVerifyCode}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    autoFocus
+                    maxLength={6}
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #e9ecef", fontSize: 18, letterSpacing: 4, textAlign: "center", marginBottom: 16, boxSizing: "border-box" }}
+                  />
+                  <button type="submit" disabled={otpSubmitting} className={styles.quickCheckBtn} style={{ width: "100%", justifyContent: "center", background: "#b5602f" }}>
+                    {otpSubmitting ? "Verifying..." : "Verify"}
+                  </button>
+                </form>
+              )}
+
+              <button onClick={closeOtpModal} style={{ display: "block", margin: "16px auto 0", background: "none", border: "none", color: "#6c757d", fontSize: 13, cursor: "pointer" }}>
+                Cancel
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

@@ -1,0 +1,20 @@
+.hero { padding: 100px 0 50px; text-align: center; }
+.diagram { position: relative; max-width: 720px; margin: 0 auto 90px; height: 380px; }
+.centerNode {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 100px; height: 100px; border-radius: 50%;
+  background: var(--lime); color: #faf8ef;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 14px; text-align: center;
+  box-shadow: 0 0 0 12px var(--lime-bg);
+}
+.node {
+  position: absolute; width: 84px; height: 84px; border-radius: 50%;
+  background: var(--bg-raised); border: 1px solid var(--hairline);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: var(--shadow);
+}
+.detailCard {
+  max-width: 480px; margin: 0 auto; padding: 26px 30px;
+  background: var(--bg-raised); border: 1px solid var(--lime); text-align: center;
+}

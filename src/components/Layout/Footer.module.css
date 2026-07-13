@@ -1,0 +1,43 @@
+.footer { background: #0a0a0a; padding: 60px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+.footGrid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footBrand {
+  display: flex; align-items: center; gap: 10px;
+  color: #ffffff; font-family: var(--font-display); font-weight: 700; font-size: 19px;
+  margin-bottom: 12px;
+}
+.footBrand em { font-style: normal; color: #8fc2d6; }
+.brandLogo { height: 32px; width: auto; }
+
+.footTagline { font-size: 14px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; margin: 0; max-width: 280px; }
+
+.footH {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3); margin: 0 0 16px; font-family: var(--font-mono);
+}
+
+.footLinks { list-style: none; margin: 0; padding: 0; }
+.footLinks li { margin-bottom: 8px; }
+.footLinks a { font-size: 14px; color: rgba(255, 255, 255, 0.5); text-decoration: none; font-family: var(--font-mono); transition: color var(--transition); }
+.footLinks a:hover { color: #ffffff; }
+
+.footContactLine { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255, 255, 255, 0.5); margin: 0 0 10px; font-family: var(--font-mono); }
+
+.copyright { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; max-width: 1200px; margin: 0 auto; font-size: 12px; color: rgba(255, 255, 255, 0.25); font-family: var(--font-mono); }
+.copyrightLinks { display: flex; gap: 20px; }
+.copyrightLinks a { color: rgba(255, 255, 255, 0.25); text-decoration: none; transition: color var(--transition); }
+.copyrightLinks a:hover { color: rgba(255, 255, 255, 0.5); }
+
+@media (max-width: 1024px) { .footGrid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 768px) {
+  .footGrid { grid-template-columns: 1fr; gap: 32px; padding: 0 24px 40px; }
+  .copyright { flex-direction: column; gap: 12px; text-align: center; }
+}

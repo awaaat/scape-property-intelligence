@@ -1,0 +1,35 @@
+.page { background: #0d1117; min-height: 100vh; }
+.hero { padding: 90px 0 40px; text-align: center; }
+.kicker { font-family: var(--font-mono); font-size: 12px; color: #58a6ff; letter-spacing: 2px; }
+.title { font-family: var(--font-display); font-size: clamp(1.9rem, 3.6vw, 2.6rem); color: #e6edf3; margin: 14px 0; }
+.lead { color: #8b949e; max-width: 520px; margin: 0 auto; }
+
+.terminal {
+  max-width: 720px;
+  margin: 0 auto 60px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.termBar { display: flex; gap: 6px; padding: 10px 14px; background: #0d1117; border-bottom: 1px solid #30363d; }
+.termDot { width: 10px; height: 10px; border-radius: 50%; }
+.termBody { padding: 18px 20px; font-family: var(--font-mono); font-size: 13px; color: #58a6ff; min-height: 24px; }
+
+.tabs { display: flex; gap: 2px; max-width: 720px; margin: 0 auto; }
+.tab {
+  flex: 1; padding: 12px; text-align: center; cursor: pointer;
+  font-family: var(--font-mono); font-size: 12px; color: #8b949e;
+  background: #161b22; border: 1px solid #30363d; border-bottom: none;
+}
+.tabOn { color: #e6edf3; background: #0d1117; border-bottom: 2px solid #58a6ff; }
+
+.panel {
+  max-width: 720px; margin: 0 auto 90px;
+  background: #161b22; border: 1px solid #30363d; border-top: none;
+  padding: 24px 26px; font-family: var(--font-mono); font-size: 13px;
+}
+.panelMethod { color: #7ee787; font-weight: 700; }
+.panelPath { color: #e6edf3; margin-left: 8px; }
+.panelDesc { color: #8b949e; margin: 10px 0 18px; font-family: var(--font-sans); font-size: 13.5px; }
+.jsonBlock { background: #0d1117; border: 1px solid #21262d; padding: 16px; border-radius: 6px; color: #7ee787; white-space: pre-wrap; line-height: 1.7; }

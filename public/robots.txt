@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+Disallow: /verify-email
+Disallow: /payment/callback
+
+Sitemap: https://www.scapedatasolutions.com/sitemap.xml
