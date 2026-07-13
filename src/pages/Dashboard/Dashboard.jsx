@@ -191,10 +191,14 @@ export default function Dashboard() {
 
   // ─── Stats ──────────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const total = reports.length;
+    const now = Date.now();
+    const cutoff = now - 24 * 60 * 60 * 1000; // 24 hours ago
+    const recent = reports.filter(r => new Date(r.created_at).getTime() >= cutoff);
+
+    const total = recent.length;
     const scores = reports.map(r => r.score).filter(s => s !== null);
     const avgScore = scores.length ? Math.round(scores.reduce((a,b) => a+b, 0) / scores.length) : 0;
-    const ready = reports.filter(r => r.status === "ready").length;
+    const ready = recent.filter(r => r.status === "ready").length;
     const pending = reports.filter(r => r.status === "pending" || r.status === "generating").length;
     const failed = reports.filter(r => r.status === "failed").length;
     return { total, avgScore, ready, pending, failed };
@@ -544,9 +548,9 @@ export default function Dashboard() {
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
               <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={20} />, color: "#8a4522" }} />
-              <StatCard stat={{ label: "Total Reports", value: stats.total, icon: <FileText size={20} />, color: "#35606e" }} />
+              <StatCard stat={{ label: "Reports (24h)", value: stats.total, icon: <FileText size={20} />, color: "#35606e" }} />
               <StatCard stat={{ label: "Average Score", value: stats.avgScore, icon: <BarChart2 size={20} />, color: "#b5602f" }} />
-              <StatCard stat={{ label: "Ready", value: stats.ready, icon: <CheckCircle size={20} />, color: "#2e7d32" }} />
+              <StatCard stat={{ label: "Ready (24h)", value: stats.ready, icon: <CheckCircle size={20} />, color: "#2e7d32" }} />
               <StatCard stat={{ label: "Pending", value: stats.pending, icon: <Clock size={20} />, color: "#ed6c02" }} />
             </div>
 
