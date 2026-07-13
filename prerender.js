@@ -1,29 +1,43 @@
 // Runs after `vite build`. Visits every public route with Puppeteer,
 // waits for react-helmet-async to finish writing <head>, and saves the
 // fully rendered HTML into dist/<route>/index.html.
-import puppeteer from "puppeteer";
+//
+// Uses @sparticuz/chromium on Vercel (its build sandbox lacks system
+// libraries for full Puppeteer's bundled Chrome) and falls back to a
+// normal local Chrome/Chromium install elsewhere (e.g. Render, your machine).
+import puppeteerCore from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { createServer } from "vite";
 import fs from "fs";
 import path from "path";
 
 const ROUTES = [
-  "/",
-  "/about",
-  "/blog",
-  "/careers",
-  "/contact",
-  "/privacy",
-  "/terms",
-  "/cookies",
-  "/api-docs",
-  "/integrations",
-  "/pricing",
-  "/property-intel",
-  "/solutions/brokers",
-  "/solutions/buyers-agents",
-  "/solutions/lenders",
-  "/solutions/legal"
+  "/", "/about", "/blog", "/careers", "/contact", "/privacy", "/terms",
+  "/cookies", "/api-docs", "/integrations", "/pricing", "/property-intel",
+  "/solutions/brokers", "/solutions/buyers-agents", "/solutions/lenders",
+  "/solutions/legal",
 ];
+
+const isServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+async function launchBrowser() {
+  if (isServerless) {
+    return puppeteerCore.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+  }
+  // Local/Render: use whatever Chrome/Chromium is installed on the system.
+  return puppeteerCore.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath:
+      process.env.CHROME_EXECUTABLE_PATH ||
+      "/usr/bin/google-chrome" ||
+      "/usr/bin/chromium-browser",
+  });
+}
 
 async function run() {
   const server = await createServer({
@@ -34,10 +48,7 @@ async function run() {
   const preview = await server.listen(5099);
   const base = "http://localhost:5099";
 
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  const browser = await launchBrowser();
   const page = await browser.newPage();
 
   for (const route of ROUTES) {
