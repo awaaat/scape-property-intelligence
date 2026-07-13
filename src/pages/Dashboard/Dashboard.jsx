@@ -1,5 +1,5 @@
 // src/pages/dashboard/Dashboard.jsx
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -122,6 +122,18 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [usage, setUsage] = useState(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [wallet, setWallet] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
@@ -517,6 +529,7 @@ export default function Dashboard() {
               {activeTab === "overview" && "Dashboard Overview"}
               {activeTab === "reports" && "My Reports"}
               {activeTab === "analytics" && "Analytics"}
+              {activeTab === "profile" && "Profile"}
               {activeTab === "settings" && "Settings"}
             </h1>
           </div>
@@ -539,8 +552,40 @@ export default function Dashboard() {
                 <RefreshCw size={18} />
               </motion.div>
             </button>
-            <div className={styles.userMenu}>
-              <div className={styles.userAvatarSmall}>{userName.charAt(0).toUpperCase()}</div>
+            <div className={styles.userMenu} ref={profileMenuRef}>
+              <button
+                className={styles.userAvatarSmall}
+                onClick={() => setProfileMenuOpen((open) => !open)}
+                style={{ border: "none", padding: 0 }}
+              >
+                {userName.charAt(0).toUpperCase()}
+              </button>
+              <AnimatePresence>
+                {profileMenuOpen && (
+                  <motion.div
+                    className={styles.profileDropdown}
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <div className={styles.profileDropdownHeader}>
+                      <span className={styles.profileDropdownName}>{userName}</span>
+                      <span className={styles.profileDropdownEmail}>{userProfile?.email || ""}</span>
+                    </div>
+                    <button className={styles.profileDropdownItem} onClick={() => { setActiveTab("profile"); setProfileMenuOpen(false); }}>
+                      <User size={16} /> Profile
+                    </button>
+                    <button className={styles.profileDropdownItem} onClick={() => { setActiveTab("settings"); setProfileMenuOpen(false); }}>
+                      <Settings size={16} /> Settings
+                    </button>
+                    <div className={styles.profileDropdownDivider} />
+                    <button className={styles.profileDropdownItem} onClick={handleLogout}>
+                      <LogOut size={16} /> Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
@@ -673,13 +718,20 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ─── SETTINGS TAB ─── */}
-        {activeTab === "settings" && (
+        {/* ─── PROFILE TAB ─── */}
+        {activeTab === "profile" && (
           <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
-
-            {/* Account */}
             <motion.div className={styles.activityCard} variants={fadeUp} style={{ marginBottom: 24 }}>
-              <div className={styles.cardHeader}><h4>Account</h4></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "8px 4px 20px" }}>
+                <div className={styles.userAvatar} style={{ width: 56, height: 56, fontSize: 22 }}>
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <strong style={{ fontSize: 18, display: "block" }}>{userName}</strong>
+                  <span style={{ fontSize: 13, color: "#8c826a" }}>{userProfile?.email || "—"}</span>
+                </div>
+              </div>
+              <div className={styles.cardHeader}><h4>Account details</h4></div>
               <div style={{ padding: "8px 4px", display: "grid", gap: 14 }}>
                 <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Full name</span><strong>{userProfile?.full_name || "—"}</strong></div>
                 <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Email</span><strong>{userProfile?.email || "—"}</strong> {userProfile?.email_verified ? <span style={{ color: "#2e7d32", fontSize: 12, marginLeft: 8 }}>Verified</span> : <span style={{ color: "#ed6c02", fontSize: 12, marginLeft: 8 }}>Not verified</span>}</div>
@@ -687,6 +739,12 @@ export default function Dashboard() {
                 <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Member since</span><strong>{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : "—"}</strong></div>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+
+        {/* ─── SETTINGS TAB ─── */}
+        {activeTab === "settings" && (
+          <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
 
             {/* Change password */}
             <motion.div className={styles.activityCard} variants={fadeUp} style={{ marginBottom: 24 }}>
