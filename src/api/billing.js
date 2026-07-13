@@ -79,6 +79,16 @@ export async function fetchMyUsage() {
 }
 
 /**
+ * GET /api/payments/wallet/ — the logged-in user's wallet balance + ledger.
+ * Requires login (401 if not authenticated).
+ * Returns: { balance: "0.00", transactions: [...] }  (see WalletSerializer)
+ */
+export async function fetchWallet() {
+  const { data } = await client.get("/payments/wallet/");
+  return data;
+}
+
+/**
  * POST /api/property/otp/request/ — sends an SMS code to the given
  * phone number for a flagged device. Backend accepts any of the Kenyan
  * phone formats (0712345678, +254712345678, 254712345678) — no need to

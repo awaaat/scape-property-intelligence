@@ -15,7 +15,7 @@ import {
 import styles from "./Dashboard.module.css";
 import api, { tokenStorage } from "../../api/client";
 import { logout as apiLogout } from "../../api/auth";
-import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, requestOTP, verifyOTP } from "../../api/billing";
+import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, fetchWallet, requestOTP, verifyOTP } from "../../api/billing";
 import { getDeviceFingerprint } from "../../utils/deviceId";
 
 // ─── ANIMATION VARIANTS (same as before) ──────────────────────────────
@@ -122,6 +122,7 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [usage, setUsage] = useState(null);
+  const [wallet, setWallet] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm: "" });
@@ -161,6 +162,7 @@ export default function Dashboard() {
     }
     fetchReports();
     fetchMyUsage().then(setUsage).catch(() => {});
+    fetchWallet().then(setWallet).catch(() => {});
     // Fetch user info (optional)
     api.get("/users/me/").then(({ data }) => {
       setUserName(data.full_name || "User");
@@ -183,6 +185,7 @@ export default function Dashboard() {
       setIsRefreshing(true);
       await fetchReports({ silent: true });
       await fetchMyUsage().then(setUsage).catch(() => {});
+      await fetchWallet().then(setWallet).catch(() => {});
       setIsRefreshing(false);
     }, pollMs);
 
@@ -547,6 +550,7 @@ export default function Dashboard() {
           <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
+              <StatCard stat={{ label: "My Balance", value: wallet ? `KES ${Number(wallet.balance).toLocaleString()}` : "—", icon: <DollarSign size={20} />, color: "#2e7d32" }} />
               <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={20} />, color: "#8a4522" }} />
               <StatCard stat={{ label: "Reports (24h)", value: stats.total, icon: <FileText size={20} />, color: "#35606e" }} />
               <StatCard stat={{ label: "Average Score", value: stats.avgScore, icon: <BarChart2 size={20} />, color: "#b5602f" }} />
