@@ -7,7 +7,7 @@
 // normal local Chrome/Chromium install elsewhere (e.g. Render, your machine).
 import puppeteerCore from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { createServer } from "vite";
+import { preview } from "vite";
 import fs from "fs";
 import path from "path";
 
@@ -40,13 +40,11 @@ async function launchBrowser() {
 }
 
 async function run() {
-  const server = await createServer({
+  const server = await preview({
     root: process.cwd(),
-    server: { port: 5099 },
     preview: { port: 5099 },
   });
-  const preview = await server.listen(5099);
-  const base = "http://localhost:5099";
+  const base = `http://localhost:${server.config.preview.port}`;
 
   const browser = await launchBrowser();
   const page = await browser.newPage();
@@ -64,7 +62,7 @@ async function run() {
   }
 
   await browser.close();
-  await preview.close();
+  server.httpServer.close();
 }
 
 run().catch((err) => {
