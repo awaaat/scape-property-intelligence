@@ -50,7 +50,7 @@ const StatCard = ({ stat }) => (
   </motion.div>
 );
 
-const ReportRow = ({ report, onClick }) => {
+const ReportRow = ({ report, onClick, onRetry, onCancel }) => {
   const getStatusColor = (status) => {
     switch(status) {
       case 'ready': return '#2e7d32';
@@ -94,6 +94,16 @@ const ReportRow = ({ report, onClick }) => {
         <button className={styles.viewBtn} onClick={(e) => { e.stopPropagation(); onClick(report); }}>
           <Eye size={16} />
         </button>
+        {report.status === "failed" && (
+          <button className={styles.viewBtn} title="Retry" onClick={(e) => { e.stopPropagation(); onRetry(report); }}>
+            <RefreshCw size={16} />
+          </button>
+        )}
+        {(report.status === "pending" || report.status === "generating") && (
+          <button className={styles.viewBtn} title="Cancel" onClick={(e) => { e.stopPropagation(); onCancel(report); }}>
+            <X size={16} />
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -112,6 +122,11 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [usage, setUsage] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm: "" });
+  const [passwordStatus, setPasswordStatus] = useState(null);
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 
   // ─── OTP modal state ────────────────────────────────────────────
   const [otpModal, setOtpModal] = useState(null); // { reportId, fingerprintHash, step: "phone"|"code", phoneNumber }
@@ -149,22 +164,27 @@ export default function Dashboard() {
     // Fetch user info (optional)
     api.get("/users/me/").then(({ data }) => {
       setUserName(data.full_name || "User");
+      setUserProfile(data);
     }).catch(() => {});
   }, []);
 
-  // ─── Live polling while any report is pending/generating ───────────
+  // ─── Live polling — always keeps reports + usage/balance in sync.
+  // Faster (4s) while something is actively pending/generating so the
+  // user sees status flip quickly; slower (15s) otherwise so cancels,
+  // retries, or changes from another tab/device still surface without
+  // the user needing to hit refresh manually. ───────────────────────
   useEffect(() => {
     const hasPending = reports.some(
       (r) => r.status === "pending" || r.status === "generating"
     );
-    if (!hasPending) return;
+    const pollMs = hasPending ? 4000 : 15000;
 
     const interval = setInterval(async () => {
       setIsRefreshing(true);
       await fetchReports({ silent: true });
       await fetchMyUsage().then(setUsage).catch(() => {});
       setIsRefreshing(false);
-    }, 4000);
+    }, pollMs);
 
     return () => clearInterval(interval);
   }, [reports]);
@@ -347,6 +367,64 @@ export default function Dashboard() {
     link.download = `scape-reports-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  useEffect(() => {
+    if (activeTab === "settings") {
+      api.get("/payments/history/").then(({ data }) => setPaymentHistory(data)).catch(() => {});
+    }
+  }, [activeTab]);
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordStatus(null);
+    if (passwordForm.new_password !== passwordForm.confirm) {
+      setPasswordStatus({ type: "error", text: "New passwords don't match." });
+      return;
+    }
+    setPasswordSubmitting(true);
+    try {
+      await api.post("/users/change-password/", {
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password,
+      });
+      setPasswordStatus({ type: "success", text: "Password updated successfully." });
+      setPasswordForm({ current_password: "", new_password: "", confirm: "" });
+    } catch (err) {
+      setPasswordStatus({ type: "error", text: err.response?.data?.detail || "Could not update password." });
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
+
+  // ─── Retry / Cancel handlers ─────────────────────────────────────
+  const [actionBusy, setActionBusy] = useState(null); // report id currently being retried/cancelled
+
+  const handleRetryReport = async (report) => {
+    setActionBusy(report.id);
+    try {
+      await api.post(`/property/reports/${report.id}/retry/`);
+      setCheckStatusMessage({ type: "success", text: "Retrying report generation." });
+      await fetchReports({ silent: true });
+    } catch (err) {
+      setCheckStatusMessage({ type: "error", text: err.response?.data?.error || "Could not retry this report." });
+    } finally {
+      setActionBusy(null);
+    }
+  };
+
+  const handleCancelReport = async (report) => {
+    setActionBusy(report.id);
+    try {
+      await api.post(`/property/reports/${report.id}/cancel/`);
+      setCheckStatusMessage({ type: "success", text: "Report cancelled — your free report was credited back." });
+      await fetchReports({ silent: true });
+      await fetchMyUsage().then(setUsage).catch(() => {});
+    } catch (err) {
+      setCheckStatusMessage({ type: "error", text: err.response?.data?.error || "Could not cancel this report." });
+    } finally {
+      setActionBusy(null);
+    }
   };
 
   // ─── RENDER ────────────────────────────────────────────────────────
@@ -570,7 +648,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   filteredReports.map((report) => (
-                    <ReportRow key={report.id} report={report} onClick={() => setSelectedReport(report)} />
+                    <ReportRow key={report.id} report={report} onClick={() => setSelectedReport(report)} onRetry={handleRetryReport} onCancel={handleCancelReport} />
                   ))
                 )}
               </div>
@@ -578,15 +656,82 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Placeholder tabs */}
-        {["analytics", "settings"].includes(activeTab) && (
+        {/* Placeholder tab */}
+        {activeTab === "analytics" && (
           <div className={styles.placeholderContent}>
-            <div className={styles.placeholderIcon}>
-              {activeTab === "analytics" ? <PieChart size={48} /> : <Settings size={48} />}
-            </div>
-            <h3>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+            <div className={styles.placeholderIcon}><PieChart size={48} /></div>
+            <h3>Analytics</h3>
             <p>This section is under development. Check back soon!</p>
           </div>
+        )}
+
+        {/* ─── SETTINGS TAB ─── */}
+        {activeTab === "settings" && (
+          <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
+
+            {/* Account */}
+            <motion.div className={styles.activityCard} variants={fadeUp} style={{ marginBottom: 24 }}>
+              <div className={styles.cardHeader}><h4>Account</h4></div>
+              <div style={{ padding: "8px 4px", display: "grid", gap: 14 }}>
+                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Full name</span><strong>{userProfile?.full_name || "—"}</strong></div>
+                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Email</span><strong>{userProfile?.email || "—"}</strong> {userProfile?.email_verified ? <span style={{ color: "#2e7d32", fontSize: 12, marginLeft: 8 }}>Verified</span> : <span style={{ color: "#ed6c02", fontSize: 12, marginLeft: 8 }}>Not verified</span>}</div>
+                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Phone</span><strong>{userProfile?.phone || "—"}</strong></div>
+                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Member since</span><strong>{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : "—"}</strong></div>
+              </div>
+            </motion.div>
+
+            {/* Change password */}
+            <motion.div className={styles.activityCard} variants={fadeUp} style={{ marginBottom: 24 }}>
+              <div className={styles.cardHeader}><h4>Change password</h4></div>
+              <form onSubmit={handlePasswordSubmit} style={{ padding: "8px 4px", display: "grid", gap: 12, maxWidth: 380 }}>
+                {passwordStatus && (
+                  <p style={{ fontSize: 13, color: passwordStatus.type === "error" ? "#d32f2f" : "#2e7d32", margin: 0 }}>{passwordStatus.text}</p>
+                )}
+                <input type="password" required placeholder="Current password" value={passwordForm.current_password}
+                  onChange={(e) => setPasswordForm(f => ({ ...f, current_password: e.target.value }))}
+                  style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #e9ecef", fontSize: 14 }} />
+                <input type="password" required placeholder="New password" value={passwordForm.new_password}
+                  onChange={(e) => setPasswordForm(f => ({ ...f, new_password: e.target.value }))}
+                  style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #e9ecef", fontSize: 14 }} />
+                <input type="password" required placeholder="Confirm new password" value={passwordForm.confirm}
+                  onChange={(e) => setPasswordForm(f => ({ ...f, confirm: e.target.value }))}
+                  style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #e9ecef", fontSize: 14 }} />
+                <button type="submit" disabled={passwordSubmitting} className={styles.quickCheckBtn} style={{ justifyContent: "center", background: "#b5602f", width: "fit-content" }}>
+                  {passwordSubmitting ? "Updating..." : "Update password"}
+                </button>
+              </form>
+            </motion.div>
+
+            {/* Billing & usage */}
+            <motion.div className={styles.activityCard} variants={fadeUp} style={{ marginBottom: 24 }}>
+              <div className={styles.cardHeader}><h4>Billing & usage</h4></div>
+              <div style={{ padding: "8px 4px 16px", display: "flex", gap: 32 }}>
+                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Free reports left</span><strong style={{ fontSize: 20 }}>{usage?.freeReportsRemaining ?? "—"}</strong></div>
+                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Free reports used</span><strong style={{ fontSize: 20 }}>{usage?.freeReportsUsedTotal ?? "—"}</strong></div>
+              </div>
+              {paymentHistory.length === 0 ? (
+                <p className={styles.emptyState}>No payments yet.</p>
+              ) : (
+                <div className={styles.propertiesTable}>
+                  <div className={styles.tableHeader}>
+                    <span>Reference</span><span>Amount</span><span>Status</span><span>Date</span><span></span>
+                  </div>
+                  <div className={styles.tableBody}>
+                    {paymentHistory.map((txn) => (
+                      <div key={txn.reference} className={styles.propertyRow}>
+                        <div className={styles.propertyCell}>{txn.reference}</div>
+                        <div className={styles.propertyCell}>{txn.amount} {txn.currency}</div>
+                        <div className={styles.propertyCell} style={{ color: txn.status === "success" ? "#2e7d32" : txn.status === "failed" ? "#d32f2f" : "#ed6c02" }}>{txn.status}</div>
+                        <div className={styles.propertyCell}>{txn.paid_at ? new Date(txn.paid_at).toLocaleDateString() : new Date(txn.created_at).toLocaleDateString()}</div>
+                        <div className={styles.propertyCell}></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+
+          </motion.div>
         )}
       </motion.main>
 
@@ -642,6 +787,24 @@ export default function Dashboard() {
                 <button className={styles.detailActionBtn} onClick={() => handleShare(selectedReport)}>
                   <Share2 size={16} /> Share
                 </button>
+                {selectedReport.status === "failed" && (
+                  <button
+                    className={styles.detailActionBtn}
+                    disabled={actionBusy === selectedReport.id}
+                    onClick={() => handleRetryReport(selectedReport)}
+                  >
+                    <RefreshCw size={16} /> {actionBusy === selectedReport.id ? "Retrying..." : "Retry"}
+                  </button>
+                )}
+                {(selectedReport.status === "pending" || selectedReport.status === "generating") && (
+                  <button
+                    className={styles.detailActionBtn}
+                    disabled={actionBusy === selectedReport.id}
+                    onClick={() => handleCancelReport(selectedReport)}
+                  >
+                    <X size={16} /> {actionBusy === selectedReport.id ? "Cancelling..." : "Cancel"}
+                  </button>
+                )}
               </div>
             </div>
           </motion.aside>
