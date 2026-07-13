@@ -421,7 +421,7 @@ export default function HomePage() {
 
   // Auto-slide effects
   useEffect(() => {
-    const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 9500);
+    const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 22000);
     return () => clearInterval(t);
   }, []);
 
