@@ -34,19 +34,21 @@ const staggerContainer = {
 
 // ─── SUB-COMPONENTS ─────────────────────────────────────────────────────
 const StatCard = ({ stat }) => (
-  <motion.div className={styles.statCard} variants={scaleIn} whileHover={{ y: -6 }}>
-    <div className={styles.statIcon} style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
-      {stat.icon}
+  <motion.div className={styles.statCard} variants={scaleIn}>
+    <div className={styles.statIconRow}>
+      <div className={styles.statIcon} style={{ color: stat.color }}>
+        {stat.icon}
+      </div>
+      <span className={styles.statLabel}>{stat.label}</span>
     </div>
     <div className={styles.statContent}>
       <span className={styles.statValue}>{stat.value}</span>
-      <span className={styles.statLabel}>{stat.label}</span>
+      {stat.change && (
+        <div className={`${styles.statChange} ${stat.change.startsWith('+') ? styles.statChangePositive : styles.statChangeNegative}`}>
+          {stat.change}
+        </div>
+      )}
     </div>
-    {stat.change && (
-      <div className={`${styles.statChange} ${stat.change.startsWith('+') ? styles.statChangePositive : styles.statChangeNegative}`}>
-        {stat.change}
-      </div>
-    )}
   </motion.div>
 );
 
@@ -595,12 +597,12 @@ export default function Dashboard() {
           <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
-              <StatCard stat={{ label: "My Balance", value: wallet ? `KES ${Number(wallet.balance).toLocaleString()}` : "—", icon: <DollarSign size={20} />, color: "#2e7d32" }} />
-              <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={20} />, color: "#8a4522" }} />
-              <StatCard stat={{ label: "Reports (24h)", value: stats.total, icon: <FileText size={20} />, color: "#35606e" }} />
-              <StatCard stat={{ label: "Average Score", value: stats.avgScore, icon: <BarChart2 size={20} />, color: "#b5602f" }} />
-              <StatCard stat={{ label: "Ready (24h)", value: stats.ready, icon: <CheckCircle size={20} />, color: "#2e7d32" }} />
-              <StatCard stat={{ label: "Pending", value: stats.pending, icon: <Clock size={20} />, color: "#ed6c02" }} />
+              <StatCard stat={{ label: "My Balance", value: wallet ? `KES ${Number(wallet.balance).toLocaleString()}` : "—", icon: <DollarSign size={14} />, color: "#8a4522" }} />
+              <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={14} />, color: "#8a4522" }} />
+              <StatCard stat={{ label: "Reports (24h)", value: stats.total, icon: <FileText size={14} />, color: "#35606e" }} />
+              <StatCard stat={{ label: "Average Score", value: stats.avgScore, icon: <BarChart2 size={14} />, color: "#b5602f" }} />
+              <StatCard stat={{ label: "Ready (24h)", value: stats.ready, icon: <CheckCircle size={14} />, color: "#2e7d32" }} />
+              <StatCard stat={{ label: "Pending", value: stats.pending, icon: <Clock size={14} />, color: "#ed6c02" }} />
             </div>
 
             {/* Quick Check */}
