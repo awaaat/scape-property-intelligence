@@ -34,7 +34,10 @@ async function run() {
   const preview = await server.listen(5099);
   const base = "http://localhost:5099";
 
-  const browser = await puppeteer.launch({ headless: "new" });
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
 
   for (const route of ROUTES) {
