@@ -358,7 +358,7 @@ export default function Dashboard() {
 
   const handleOpenReport = (report) => {
     setViewedReportIds(markReportViewed(report.id));
-    setSelectedReport(report);
+    setSelectedReport((current) => (current?.id === report.id ? null : report));
   };
 
   const closeOtpModal = () => {
