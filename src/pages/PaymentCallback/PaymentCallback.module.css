@@ -68,3 +68,9 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.redirectNote {
+  font-size: 13px;
+  color: var(--text-muted, #6c757d);
+  margin-top: -8px;
+}

@@ -137,7 +137,7 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const [wallet, setWallet] = useState(null);
-  const [topUpBusy, setTopUpBusy] = useState(false);
+  const [topUpModal, setTopUpModal] = useState(null); // { amount: string, submitting: bool, error: string }
   const [userProfile, setUserProfile] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm: "" });
@@ -354,6 +354,29 @@ export default function Dashboard() {
     setOtpModal(null);
     setOtpCode("");
     setOtpError(null);
+  };
+
+  // ─── Top-up handlers ────────────────────────────────────────────────
+  const closeTopUpModal = () => setTopUpModal(null);
+
+  const handleTopUpSubmit = async (e) => {
+    e.preventDefault();
+    const amount = Number(topUpModal.amount);
+    if (!amount || amount <= 0) {
+      setTopUpModal((m) => ({ ...m, error: "Enter a valid amount greater than 0." }));
+      return;
+    }
+    setTopUpModal((m) => ({ ...m, submitting: true, error: "" }));
+    try {
+      const { checkout_url } = await topUpWallet({ amount });
+      if (checkout_url) {
+        window.location.href = checkout_url;
+      } else {
+        setTopUpModal((m) => ({ ...m, submitting: false, error: "Could not start top-up right now — please try again." }));
+      }
+    } catch (err) {
+      setTopUpModal((m) => ({ ...m, submitting: false, error: err?.response?.data?.error || "Could not start top-up right now — please try again." }));
+    }
   };
 
   // ─── Report action handlers ─────────────────────────────────────────
@@ -602,37 +625,15 @@ export default function Dashboard() {
                 <StatCard stat={{ label: "My Balance", value: wallet ? `KES ${Number(wallet.balance).toLocaleString()}` : "—", icon: <DollarSign size={14} />, color: "#8a4522" }} />
                 <button
                   type="button"
-                  onClick={async () => {
-                    const input = window.prompt("How much would you like to add to your balance? (KES)");
-                    if (!input) return;
-                    const amount = Number(input);
-                    if (!amount || amount <= 0) {
-                      window.alert("Enter a valid amount greater than 0.");
-                      return;
-                    }
-                    setTopUpBusy(true);
-                    try {
-                      const { checkout_url } = await topUpWallet({ amount });
-                      if (checkout_url) {
-                        window.location.href = checkout_url;
-                      } else {
-                        window.alert("Could not start top-up right now — please try again.");
-                      }
-                    } catch (err) {
-                      window.alert(err?.response?.data?.error || "Could not start top-up right now — please try again.");
-                    } finally {
-                      setTopUpBusy(false);
-                    }
-                  }}
-                  disabled={topUpBusy}
+                  onClick={() => setTopUpModal({ amount: "", submitting: false, error: "" })}
                   style={{
                     display: "block", width: "calc(100% - 32px)", margin: "0 16px 12px",
                     fontSize: 11, fontWeight: 600, padding: "5px 10px", borderRadius: 999,
                     border: "1px solid #8a4522", background: "transparent", color: "#8a4522",
-                    cursor: topUpBusy ? "default" : "pointer", opacity: topUpBusy ? 0.6 : 1,
+                    cursor: "pointer",
                   }}
                 >
-                  {topUpBusy ? "…" : "Top Up"}
+                  Top Up
                 </button>
               </div>
               <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={14} />, color: "#8a4522" }} />
@@ -984,6 +985,84 @@ export default function Dashboard() {
               )}
 
               <button onClick={closeOtpModal} style={{ display: "block", margin: "16px auto 0", background: "none", border: "none", color: "#6c757d", fontSize: 13, cursor: "pointer" }}>
+                Cancel
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── TOP UP MODAL ─── */}
+      <AnimatePresence>
+        {topUpModal && (
+          <motion.div
+            style={{ position: "fixed", inset: 0, background: "rgba(15,32,39,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeTopUpModal}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <DollarSign size={20} color="#8a4522" />
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Top up your balance</h3>
+              </div>
+              <p style={{ fontSize: 13, color: "#6c757d", marginBottom: 20 }}>
+                Add funds via M-Pesa or card. You'll be redirected to Paystack to complete payment.
+              </p>
+
+              {topUpModal.error && (
+                <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", background: "rgba(211,47,47,0.08)", border: "1px solid #d32f2f", color: "#d32f2f", fontSize: 13, borderRadius: 8, marginBottom: 16 }}>
+                  <AlertCircle size={16} /> {topUpModal.error}
+                </div>
+              )}
+
+              <form onSubmit={handleTopUpSubmit}>
+                <div style={{ position: "relative", marginBottom: 12 }}>
+                  <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 14, color: "#6c757d", fontWeight: 600 }}>KES</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    required
+                    autoFocus
+                    placeholder="0"
+                    value={topUpModal.amount}
+                    onChange={(e) => setTopUpModal((m) => ({ ...m, amount: e.target.value, error: "" }))}
+                    style={{ width: "100%", padding: "12px 14px 12px 52px", borderRadius: 10, border: "1px solid #e9ecef", fontSize: 18, fontWeight: 600, boxSizing: "border-box" }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+                  {[500, 1000, 2500, 5000].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setTopUpModal((m) => ({ ...m, amount: String(preset), error: "" }))}
+                      style={{
+                        flex: 1, padding: "8px 0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        border: topUpModal.amount === String(preset) ? "1px solid #8a4522" : "1px solid #e9ecef",
+                        background: topUpModal.amount === String(preset) ? "rgba(138,69,34,0.08)" : "transparent",
+                        color: topUpModal.amount === String(preset) ? "#8a4522" : "#495057",
+                      }}
+                    >
+                      {preset.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+
+                <button type="submit" disabled={topUpModal.submitting} className={styles.quickCheckBtn} style={{ width: "100%", justifyContent: "center", background: "#8a4522" }}>
+                  {topUpModal.submitting ? "Redirecting..." : "Continue to payment"}
+                </button>
+              </form>
+
+              <button onClick={closeTopUpModal} style={{ display: "block", margin: "16px auto 0", background: "none", border: "none", color: "#6c757d", fontSize: 13, cursor: "pointer" }}>
                 Cancel
               </button>
             </motion.div>

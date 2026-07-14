@@ -7,6 +7,7 @@ import styles from "./PaymentCallback.module.css";
 // on integration path — checking both, since either can show up.
 const POLL_INTERVAL_MS = 2500;
 const MAX_POLL_ATTEMPTS = 24; // ~60s total, matches M-Pesa's own 180s prompt window with margin to spare on the shorter card-payment path
+const AUTO_REDIRECT_DELAY_MS = 2000; // time to actually see the success message before we move on
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
@@ -50,6 +51,12 @@ export default function PaymentCallback() {
             } catch {
               // non-fatal — dashboard will show it once it's ready regardless
             }
+          }
+
+          if (!cancelled) {
+            setTimeout(() => {
+              if (!cancelled) navigate("/dashboard");
+            }, AUTO_REDIRECT_DELAY_MS);
           }
           return;
         }
@@ -95,6 +102,10 @@ export default function PaymentCallback() {
           {status === "timeout" && "Still confirming"}
         </h2>
         <p>{message}</p>
+
+        {status === "success" && (
+          <p className={styles.redirectNote}>Taking you to your dashboard...</p>
+        )}
 
         {status !== "verifying" && (
           <button className={styles.dashboardBtn} onClick={() => navigate("/dashboard")}>

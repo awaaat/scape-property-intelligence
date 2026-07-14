@@ -96,7 +96,10 @@ export async function fetchWallet() {
  * exposed here as checkout_url for consistency with submitPin's 402 flow).
  */
 export async function topUpWallet({ amount }) {
-  const { data } = await client.post("/payments/wallet/topup/", { amount });
+  const { data } = await client.post("/payments/wallet/topup/", {
+    amount,
+    callback_url: `${window.location.origin}/payment/callback`,
+  });
   return { ...data, checkout_url: data.authorization_url };
 }
 
