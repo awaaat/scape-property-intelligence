@@ -318,6 +318,11 @@ export default function Dashboard() {
       setCheckStatusMessage({ type: "error", text: body?.message || "Could not start checkout. Please try again." });
     } catch (err) {
       const body = err.response?.data;
+      if (body?.checkout_url) {
+        sessionStorage.setItem("pending_report_id", body.report_id || reportId);
+        window.location.href = body.checkout_url;
+        return;
+      }
       setCheckStatusMessage({ type: "error", text: body?.error || body?.message || "Could not start checkout. Please try again." });
     }
   };
@@ -348,22 +353,19 @@ export default function Dashboard() {
         code: otpCode,
         reportId: otpModal.reportId,
       });
-      if (response.status === 402) {
-        const body = response.data;
-        if (body.checkout_url) {
-          sessionStorage.setItem("pending_report_id", body.report_id);
-          window.location.href = body.checkout_url;
-          return;
-        }
+      const body = response.data;
+      if (body?.checkout_url) {
+        sessionStorage.setItem("pending_report_id", body.report_id);
+        window.location.href = body.checkout_url;
+        return;
       }
       setOtpModal(null);
       setOtpCode("");
       setCheckStatusMessage({ type: "success", text: "Verified! Your report is being generated." });
       fetchReports();
     } catch (err) {
-      const status = err.response?.status;
       const body = err.response?.data;
-      if (status === 402 && body?.checkout_url) {
+      if (body?.checkout_url) {
         sessionStorage.setItem("pending_report_id", body.report_id);
         window.location.href = body.checkout_url;
         return;
