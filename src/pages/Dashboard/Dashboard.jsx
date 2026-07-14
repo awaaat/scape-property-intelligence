@@ -15,7 +15,7 @@ import {
 import styles from "./Dashboard.module.css";
 import api, { tokenStorage } from "../../api/client";
 import { logout as apiLogout } from "../../api/auth";
-import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, fetchWallet, requestOTP, verifyOTP } from "../../api/billing";
+import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, fetchWallet, topUpWallet, requestOTP, verifyOTP } from "../../api/billing";
 import { getDeviceFingerprint } from "../../utils/deviceId";
 
 // ─── ANIMATION VARIANTS (same as before) ──────────────────────────────
@@ -137,6 +137,7 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const [wallet, setWallet] = useState(null);
+  const [topUpBusy, setTopUpBusy] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm: "" });
@@ -597,7 +598,43 @@ export default function Dashboard() {
           <motion.div className={styles.tabContent} initial="hidden" animate="visible" variants={staggerContainer}>
             {/* Stats Grid */}
             <div className={styles.statsGrid}>
-              <StatCard stat={{ label: "My Balance", value: wallet ? `KES ${Number(wallet.balance).toLocaleString()}` : "—", icon: <DollarSign size={14} />, color: "#8a4522" }} />
+              <div>
+                <StatCard stat={{ label: "My Balance", value: wallet ? `KES ${Number(wallet.balance).toLocaleString()}` : "—", icon: <DollarSign size={14} />, color: "#8a4522" }} />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const input = window.prompt("How much would you like to add to your balance? (KES)");
+                    if (!input) return;
+                    const amount = Number(input);
+                    if (!amount || amount <= 0) {
+                      window.alert("Enter a valid amount greater than 0.");
+                      return;
+                    }
+                    setTopUpBusy(true);
+                    try {
+                      const { checkout_url } = await topUpWallet({ amount });
+                      if (checkout_url) {
+                        window.location.href = checkout_url;
+                      } else {
+                        window.alert("Could not start top-up right now — please try again.");
+                      }
+                    } catch (err) {
+                      window.alert(err?.response?.data?.error || "Could not start top-up right now — please try again.");
+                    } finally {
+                      setTopUpBusy(false);
+                    }
+                  }}
+                  disabled={topUpBusy}
+                  style={{
+                    display: "block", width: "calc(100% - 32px)", margin: "0 16px 12px",
+                    fontSize: 11, fontWeight: 600, padding: "5px 10px", borderRadius: 999,
+                    border: "1px solid #8a4522", background: "transparent", color: "#8a4522",
+                    cursor: topUpBusy ? "default" : "pointer", opacity: topUpBusy ? 0.6 : 1,
+                  }}
+                >
+                  {topUpBusy ? "…" : "Top Up"}
+                </button>
+              </div>
               <StatCard stat={{ label: "Free Reports Left", value: usage ? usage.freeReportsRemaining : "—", icon: <Gift size={14} />, color: "#8a4522" }} />
               <StatCard stat={{ label: "Reports (24h)", value: stats.total, icon: <FileText size={14} />, color: "#35606e" }} />
               <StatCard stat={{ label: "Average Score", value: stats.avgScore, icon: <BarChart2 size={14} />, color: "#b5602f" }} />

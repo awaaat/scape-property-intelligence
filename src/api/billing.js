@@ -89,6 +89,18 @@ export async function fetchWallet() {
 }
 
 /**
+ * POST /api/payments/wallet/topup/ — starts a Paystack checkout to add
+ * funds to the logged-in user's wallet balance, independent of any report
+ * purchase. Requires login.
+ * Returns: same shape as a PaystackTransaction (includes authorization_url,
+ * exposed here as checkout_url for consistency with submitPin's 402 flow).
+ */
+export async function topUpWallet({ amount }) {
+  const { data } = await client.post("/payments/wallet/topup/", { amount });
+  return { ...data, checkout_url: data.authorization_url };
+}
+
+/**
  * POST /api/property/otp/request/ — sends an SMS code to the given
  * phone number for a flagged device. Backend accepts any of the Kenyan
  * phone formats (0712345678, +254712345678, 254712345678) — no need to

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/site-images/logo-image.png" />
+    <link rel="apple-touch-icon" href="/site-images/logo-image.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+    <title>Property Intelligence | Scape Data Solutions</title>
+    <meta name="description" content="Instant parcel-level reports with land value benchmarks, accessibility and investment scoring, school and hospital proximity, and air quality data for any location in Kenya." />
+    <link rel="canonical" href="https://www.scapedatasolutions.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Scape Data Solutions" />
+    <meta property="og:title" content="Property Intelligence | Scape Data Solutions" />
+    <meta property="og:description" content="Instant parcel-level reports with land value benchmarks, accessibility and investment scoring, school and hospital proximity, and air quality data for any location in Kenya." />
+    <meta property="og:url" content="https://www.scapedatasolutions.com/" />
+    <meta property="og:image" content="https://www.scapedatasolutions.com/site-images/logo-image.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Property Intelligence | Scape Data Solutions" />
+    <meta name="twitter:description" content="Instant parcel-level reports with land value benchmarks, accessibility and investment scoring, school and hospital proximity, and air quality data for any location in Kenya." />
+    <meta name="twitter:image" content="https://www.scapedatasolutions.com/site-images/logo-image.png" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Scape Data Solutions",
+      "url": "https://www.scapedatasolutions.com",
+      "logo": "https://www.scapedatasolutions.com/site-images/logo-image.png"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Scape Data Solutions",
+      "url": "https://www.scapedatasolutions.com"
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/blog">Blog</a>
+        <a href="/contact">Contact</a>
+      </nav>
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
