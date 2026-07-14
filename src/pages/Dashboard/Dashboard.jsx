@@ -72,8 +72,7 @@ const ReportRow = ({ report, onClick, onRetry, onCancel, isUnviewed }) => {
       onClick={() => onClick(report)}
       style={isUnviewed ? {
         background: "rgba(138,69,34,0.06)",
-        borderLeft: "3px solid #8a4522",
-      } : { borderLeft: "3px solid transparent" }}
+      } : undefined}
     >
       <div className={styles.propertyCell}>
         <div className={styles.propertyAddress}>
@@ -714,8 +713,7 @@ export default function Dashboard() {
                         onClick={() => handleOpenReport(report)}
                         style={isUnviewed ? {
                           background: "rgba(138,69,34,0.06)",
-                          borderLeft: "3px solid #8a4522",
-                        } : { borderLeft: "3px solid transparent" }}
+                        } : undefined}
                       >
                         <div className={styles.activityIcon}>
                           {(report.status === "pending" || report.status === "generating")
@@ -819,13 +817,13 @@ export default function Dashboard() {
                 )}
                 <input type="password" required placeholder="Current password" value={passwordForm.current_password}
                   onChange={(e) => setPasswordForm(f => ({ ...f, current_password: e.target.value }))}
-                  style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #e9ecef", fontSize: 14 }} />
+                  style={{ padding: "10px 14px", borderRadius: 4, border: "1px solid #e9ecef", fontSize: 14 }} />
                 <input type="password" required placeholder="New password" value={passwordForm.new_password}
                   onChange={(e) => setPasswordForm(f => ({ ...f, new_password: e.target.value }))}
-                  style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #e9ecef", fontSize: 14 }} />
+                  style={{ padding: "10px 14px", borderRadius: 4, border: "1px solid #e9ecef", fontSize: 14 }} />
                 <input type="password" required placeholder="Confirm new password" value={passwordForm.confirm}
                   onChange={(e) => setPasswordForm(f => ({ ...f, confirm: e.target.value }))}
-                  style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #e9ecef", fontSize: 14 }} />
+                  style={{ padding: "10px 14px", borderRadius: 4, border: "1px solid #e9ecef", fontSize: 14 }} />
                 <button type="submit" disabled={passwordSubmitting} className={styles.quickCheckBtn} style={{ justifyContent: "center", background: "#b5602f", width: "fit-content" }}>
                   {passwordSubmitting ? "Updating..." : "Update password"}
                 </button>
@@ -956,7 +954,7 @@ export default function Dashboard() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%" }}
+              style={{ background: "#fff", borderRadius: 4, padding: 32, maxWidth: 380, width: "90%" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <Phone size={20} color="#b5602f" />
@@ -969,7 +967,7 @@ export default function Dashboard() {
               </p>
 
               {otpError && (
-                <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", background: "rgba(211,47,47,0.08)", border: "1px solid #d32f2f", color: "#d32f2f", fontSize: 13, borderRadius: 8, marginBottom: 16 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", background: "rgba(211,47,47,0.08)", border: "1px solid #d32f2f", color: "#d32f2f", fontSize: 13, borderRadius: 4, marginBottom: 16 }}>
                   <AlertCircle size={16} /> {otpError}
                 </div>
               )}
@@ -983,7 +981,7 @@ export default function Dashboard() {
                     placeholder="0712345678"
                     value={otpModal.phoneNumber}
                     onChange={(e) => setOtpModal((m) => ({ ...m, phoneNumber: e.target.value }))}
-                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #e9ecef", fontSize: 14, marginBottom: 16, boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 4, border: "1px solid #e9ecef", fontSize: 14, marginBottom: 16, boxSizing: "border-box" }}
                   />
                   <button type="submit" disabled={otpSubmitting} className={styles.quickCheckBtn} style={{ width: "100%", justifyContent: "center", background: "#b5602f" }}>
                     {otpSubmitting ? "Sending..." : "Send code"}
@@ -1000,7 +998,7 @@ export default function Dashboard() {
                     placeholder="123456"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #e9ecef", fontSize: 18, letterSpacing: 4, textAlign: "center", marginBottom: 16, boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 4, border: "1px solid #e9ecef", fontSize: 18, letterSpacing: 4, textAlign: "center", marginBottom: 16, boxSizing: "border-box" }}
                   />
                   <button type="submit" disabled={otpSubmitting} className={styles.quickCheckBtn} style={{ width: "100%", justifyContent: "center", background: "#b5602f" }}>
                     {otpSubmitting ? "Verifying..." : "Verify"}
@@ -1031,7 +1029,7 @@ export default function Dashboard() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%" }}
+              style={{ background: "#fff", borderRadius: 4, padding: 32, maxWidth: 380, width: "90%" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <DollarSign size={20} color="#8a4522" />
@@ -1042,7 +1040,7 @@ export default function Dashboard() {
               </p>
 
               {topUpModal.error && (
-                <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", background: "rgba(211,47,47,0.08)", border: "1px solid #d32f2f", color: "#d32f2f", fontSize: 13, borderRadius: 8, marginBottom: 16 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "10px 14px", background: "rgba(211,47,47,0.08)", border: "1px solid #d32f2f", color: "#d32f2f", fontSize: 13, borderRadius: 4, marginBottom: 16 }}>
                   <AlertCircle size={16} /> {topUpModal.error}
                 </div>
               )}
@@ -1059,7 +1057,7 @@ export default function Dashboard() {
                     placeholder="0"
                     value={topUpModal.amount}
                     onChange={(e) => setTopUpModal((m) => ({ ...m, amount: e.target.value, error: "" }))}
-                    style={{ width: "100%", padding: "12px 14px 12px 52px", borderRadius: 10, border: "1px solid #e9ecef", fontSize: 18, fontWeight: 600, boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "12px 14px 12px 52px", borderRadius: 4, border: "1px solid #e9ecef", fontSize: 18, fontWeight: 600, boxSizing: "border-box" }}
                   />
                 </div>
 
@@ -1070,7 +1068,7 @@ export default function Dashboard() {
                       type="button"
                       onClick={() => setTopUpModal((m) => ({ ...m, amount: String(preset), error: "" }))}
                       style={{
-                        flex: 1, padding: "8px 0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        flex: 1, padding: "8px 0", borderRadius: 4, fontSize: 12, fontWeight: 600, cursor: "pointer",
                         border: topUpModal.amount === String(preset) ? "1px solid #8a4522" : "1px solid #e9ecef",
                         background: topUpModal.amount === String(preset) ? "rgba(138,69,34,0.08)" : "transparent",
                         color: topUpModal.amount === String(preset) ? "#8a4522" : "#495057",

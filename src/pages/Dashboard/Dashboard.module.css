@@ -75,7 +75,8 @@
   color: #fff;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 4px;
+
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -101,7 +102,8 @@
   align-items: center;
   gap: 14px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: 4px;
+
   border: none;
   background: transparent;
   color: rgba(255, 255, 255, 0.6);
@@ -151,7 +153,8 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 4px;
+
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -248,7 +251,8 @@
   align-items: center;
   background: #fff;
   border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border-radius: 4px;
+
   padding: 6px 14px;
   gap: 10px;
   min-width: 220px;
@@ -287,7 +291,8 @@
   position: relative;
   background: #fff;
   border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border-radius: 4px;
+
   width: 40px;
   height: 40px;
   display: flex;
@@ -324,7 +329,8 @@
   right: 0;
   width: 340px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 4px;
+
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   z-index: 50;
@@ -393,7 +399,8 @@
 .refreshBtn {
   background: #fff;
   border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border-radius: 4px;
+
   width: 40px;
   height: 40px;
   display: flex;
@@ -439,7 +446,8 @@
   right: 0;
   width: 220px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 4px;
+
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
   border: 1px solid #eee;
   padding: 8px;
@@ -474,7 +482,8 @@
   padding: 10px 12px;
   border: none;
   background: none;
-  border-radius: 8px;
+  border-radius: 4px;
+
   font-size: 14px;
   color: #333;
   cursor: pointer;
@@ -507,7 +516,8 @@
   grid-template-columns: repeat(6, 1fr);
   background: var(--bg-raised);
   border: 1px solid var(--hairline);
-  border-radius: 10px;
+  border-radius: 4px;
+
   overflow: hidden;
   margin-bottom: 28px;
 }
@@ -590,7 +600,8 @@
 /* ─── QUICK CHECK ─── */
 .quickCheck {
   background: linear-gradient(135deg, #0f2027, #1a3a47);
-  border-radius: 14px;
+  border-radius: 4px;
+
   padding: 28px 32px;
   margin-bottom: 28px;
 }
@@ -626,7 +637,8 @@
 .quickCheckField {
   flex: 1;
   padding: 10px 16px;
-  border-radius: 10px;
+  border-radius: 4px;
+
   border: none;
   font-size: 14px;
   font-family: inherit;
@@ -652,7 +664,8 @@
   background: #b5602f;
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
+
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -675,7 +688,8 @@
 
 .chartCard {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 4px;
+
   padding: 22px 24px;
   border: 1px solid #e9ecef;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -760,7 +774,8 @@
 .metricItem {
   padding: 12px 16px;
   background: #f8f9fa;
-  border-radius: 10px;
+  border-radius: 4px;
+
 }
 
 .metricLabel {
@@ -809,7 +824,8 @@
 .activityCard,
 .propertyPreview {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 4px;
+
   padding: 20px 22px;
   border: 1px solid #e9ecef;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -856,7 +872,8 @@
   align-items: center;
   gap: 12px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 4px;
+
   transition: background 0.15s;
 }
 
@@ -911,7 +928,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 4px;
+
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -1006,14 +1024,16 @@
   gap: 4px;
   background: #f1f3f5;
   padding: 4px;
-  border-radius: 10px;
+  border-radius: 4px;
+
 }
 
 .filterBtn {
   padding: 6px 16px;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 4px;
+
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1039,7 +1059,8 @@
   padding: 8px 18px;
   background: #fff;
   border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border-radius: 4px;
+
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1054,7 +1075,8 @@
 
 .propertiesTable {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 4px;
+
   border: 1px solid #e9ecef;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -1125,7 +1147,8 @@
   color: #6c757d;
   background: #f1f3f5;
   padding: 2px 12px;
-  border-radius: 12px;
+  border-radius: 4px;
+
 }
 
 .statusBadge {
@@ -1179,7 +1202,8 @@
   color: #adb5bd;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: 4px;
+
   transition: all 0.2s;
 }
 
@@ -1239,7 +1263,8 @@
   cursor: pointer;
   color: #6c757d;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: 4px;
+
   transition: background 0.2s;
 }
 
@@ -1262,7 +1287,8 @@
   margin-bottom: 20px;
   padding: 12px 16px;
   background: #f8f9fa;
-  border-radius: 10px;
+  border-radius: 4px;
+
 }
 
 .detailPin {
@@ -1311,7 +1337,8 @@
 .detailItem {
   padding: 12px 16px;
   background: #f8f9fa;
-  border-radius: 10px;
+  border-radius: 4px;
+
 }
 
 .detailLabel {
@@ -1348,7 +1375,8 @@
   padding: 10px 14px;
   background: #f8f9fa;
   border: 1px solid #e9ecef;
-  border-radius: 10px;
+  border-radius: 4px;
+
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -1373,7 +1401,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 4px;
+
   transition: background 0.15s;
 }
 
@@ -1400,7 +1429,8 @@
   justify-content: center;
   padding: 60px 20px;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 4px;
+
   border: 1px solid #e9ecef;
   text-align: center;
 }
@@ -1541,7 +1571,8 @@
 }
 .quickCheck {
   background: linear-gradient(135deg, #0f2027, #1a3a47);
-  border-radius: 14px;
+  border-radius: 4px;
+
   padding: 28px 32px;
   margin-bottom: 28px;
 }
@@ -1572,7 +1603,8 @@
 .quickCheckField {
   flex: 1;
   padding: 10px 16px;
-  border-radius: 10px;
+  border-radius: 4px;
+
   border: none;
   font-size: 14px;
   font-family: inherit;
@@ -1595,7 +1627,8 @@
   background: #b5602f;
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
+
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -1612,7 +1645,8 @@
   font-size: 14px;
   font-weight: 500;
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 4px;
+
   display: block;
   flex-basis: 100%;
   width: fit-content;
