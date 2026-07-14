@@ -15,7 +15,7 @@ import {
 import styles from "./Dashboard.module.css";
 import api, { tokenStorage } from "../../api/client";
 import { logout as apiLogout } from "../../api/auth";
-import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, fetchWallet, topUpWallet, requestOTP, verifyOTP } from "../../api/billing";
+import { fetchReports as fetchReportsApi, submitPin, initiateReportCheckout, fetchMyUsage, fetchWallet, topUpWallet, requestOTP, verifyOTP } from "../../api/billing";
 import { getDeviceFingerprint } from "../../utils/deviceId";
 import { getViewedReportIds, markReportViewed } from "../../utils/viewedReports";
 
@@ -288,20 +288,37 @@ export default function Dashboard() {
       const status = err.response?.status;
       const body = err.response?.data;
 
-      if (status === 402 && body?.checkout_url) {
-        // Free tier exhausted — send the browser to Paystack's checkout.
-        // Persist the report id so /payment/callback can poll the right
-        // report once the payer returns.
-        sessionStorage.setItem("pending_report_id", body.report_id);
-        window.location.href = body.checkout_url;
+      if (status === 402 && body?.report_id) {
+        // Free tier exhausted. submitPin no longer talks to Paystack itself
+        // -- it just creates the report and returns immediately. The
+        // checkout call happens separately, so it can't make submission
+        // itself look stuck.
+        setCheckStatusMessage({ type: "info", text: "Starting checkout…" });
+        await handleStartCheckout(body.report_id);
         return;
       } else if (status === 403) {
-        setCheckStatusMessage({ type: "error", text: body?.error || "This device has been blocked." });
+        setCheckStatusMessage({ type: "error", text: body?.error || body?.message || "This device has been blocked." });
       } else {
-        setCheckStatusMessage({ type: "error", text: body?.error || "Submission failed. Please try again." });
+        setCheckStatusMessage({ type: "error", text: body?.error || body?.message || "Submission failed. Please try again." });
       }
     } finally {
       setCheckSubmitting(false);
+    }
+  };
+
+  const handleStartCheckout = async (reportId) => {
+    try {
+      const response = await initiateReportCheckout(reportId);
+      const body = response.data;
+      if (body?.checkout_url) {
+        sessionStorage.setItem("pending_report_id", reportId);
+        window.location.href = body.checkout_url;
+        return;
+      }
+      setCheckStatusMessage({ type: "error", text: body?.message || "Could not start checkout. Please try again." });
+    } catch (err) {
+      const body = err.response?.data;
+      setCheckStatusMessage({ type: "error", text: body?.error || body?.message || "Could not start checkout. Please try again." });
     }
   };
 

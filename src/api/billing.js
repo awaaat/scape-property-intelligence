@@ -52,6 +52,11 @@ export async function submitPin({ rawInput, email, fingerprintHash }) {
  * backend and confirms locally if successful. This is what the
  * /payment/callback page polls after Paystack redirects the browser back.
  */
+export async function initiateReportCheckout(reportId) {
+  const response = await client.post(`/property/reports/${reportId}/checkout/`, {}, { timeout: 20000 });
+  return response;
+}
+
 export async function verifyPayment(reference) {
   const { data } = await client.get(`/payments/verify/${reference}/`);
   return data;
