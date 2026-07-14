@@ -690,7 +690,7 @@ export default function Dashboard() {
               <div className={styles.quickCheckContent}>
                 <div className={styles.quickCheckText}>
                   <h3>Check a new property</h3>
-                  <p>Paste the property's Google Maps pin (or type its address) to check it</p>
+                  <p>Paste the property's Location pin (or type its address) to check it</p>
                 </div>
                 <div className={styles.quickCheckInput}>
                   <input
