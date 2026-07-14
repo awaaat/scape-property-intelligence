@@ -149,6 +149,7 @@ export default function Dashboard() {
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm: "" });
   const [passwordStatus, setPasswordStatus] = useState(null);
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState(null); // { type: "sending"|"success"|"error", text }
 
   // ─── OTP modal state ────────────────────────────────────────────
   const [otpModal, setOtpModal] = useState(null); // { reportId, fingerprintHash, step: "phone"|"code", phoneNumber }
@@ -450,6 +451,17 @@ export default function Dashboard() {
       setPasswordStatus({ type: "error", text: err.response?.data?.detail || "Could not update password." });
     } finally {
       setPasswordSubmitting(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!userProfile?.email) return;
+    setVerificationStatus({ type: "sending", text: "Sending..." });
+    try {
+      await api.post("/users/verify-email/resend/", { email: userProfile.email });
+      setVerificationStatus({ type: "success", text: "Verification email sent — check your inbox." });
+    } catch {
+      setVerificationStatus({ type: "error", text: "Could not send verification email. Try again shortly." });
     }
   };
 
@@ -796,7 +808,37 @@ export default function Dashboard() {
               <div className={styles.cardHeader}><h4>Account details</h4></div>
               <div style={{ padding: "8px 4px", display: "grid", gap: 14 }}>
                 <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Full name</span><strong>{userProfile?.full_name || "—"}</strong></div>
-                <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Email</span><strong>{userProfile?.email || "—"}</strong> {userProfile?.email_verified ? <span style={{ color: "#2e7d32", fontSize: 12, marginLeft: 8 }}>Verified</span> : <span style={{ color: "#ed6c02", fontSize: 12, marginLeft: 8 }}>Not verified</span>}</div>
+                <div>
+                  <span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Email</span>
+                  <strong>{userProfile?.email || "—"}</strong>
+                  {userProfile?.email_verified ? (
+                    <span style={{ color: "#2e7d32", fontSize: 12, marginLeft: 8 }}>Verified</span>
+                  ) : (
+                    <>
+                      <span style={{ color: "#ed6c02", fontSize: 12, marginLeft: 8 }}>Not verified</span>
+                      <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={verificationStatus?.type === "sending"}
+                        style={{
+                          marginLeft: 10, fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999,
+                          border: "1px solid #8a4522", background: "transparent", color: "#8a4522",
+                          cursor: verificationStatus?.type === "sending" ? "default" : "pointer",
+                        }}
+                      >
+                        {verificationStatus?.type === "sending" ? "Sending..." : "Resend verification email"}
+                      </button>
+                      {verificationStatus && verificationStatus.type !== "sending" && (
+                        <span style={{
+                          display: "block", marginTop: 6, fontSize: 12,
+                          color: verificationStatus.type === "success" ? "#2e7d32" : "#d32f2f",
+                        }}>
+                          {verificationStatus.text}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
                 <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Phone</span><strong>{userProfile?.phone || "—"}</strong></div>
                 <div><span style={{ fontSize: 12, color: "#8c826a", display: "block" }}>Member since</span><strong>{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : "—"}</strong></div>
               </div>
