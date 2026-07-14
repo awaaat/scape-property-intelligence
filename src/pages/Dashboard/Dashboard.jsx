@@ -106,7 +106,7 @@ const ReportRow = ({ report, onClick, onRetry, onCancel, isUnviewed }) => {
             <RefreshCw size={16} />
           </button>
         )}
-        {(report.status === "pending" || report.status === "generating") && (
+        {(report.status === "pending" || report.status === "generating" || report.status === "awaiting_payment") && (
           <button className={styles.viewBtn} title="Cancel" onClick={(e) => { e.stopPropagation(); onCancel(report); }}>
             <X size={16} />
           </button>
@@ -924,7 +924,7 @@ export default function Dashboard() {
                     <RefreshCw size={16} /> {actionBusy === selectedReport.id ? "Retrying..." : "Retry"}
                   </button>
                 )}
-                {(selectedReport.status === "pending" || selectedReport.status === "generating") && (
+                {(selectedReport.status === "pending" || selectedReport.status === "generating" || selectedReport.status === "awaiting_payment") && (
                   <button
                     className={styles.detailActionBtn}
                     disabled={actionBusy === selectedReport.id}
