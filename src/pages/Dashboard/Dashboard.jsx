@@ -17,6 +17,7 @@ import api, { tokenStorage } from "../../api/client";
 import { logout as apiLogout } from "../../api/auth";
 import { fetchReports as fetchReportsApi, submitPin, fetchMyUsage, fetchWallet, topUpWallet, requestOTP, verifyOTP } from "../../api/billing";
 import { getDeviceFingerprint } from "../../utils/deviceId";
+import { getViewedReportIds, markReportViewed } from "../../utils/viewedReports";
 
 // ─── ANIMATION VARIANTS (same as before) ──────────────────────────────
 const fadeUp = {
@@ -52,7 +53,7 @@ const StatCard = ({ stat }) => (
   </motion.div>
 );
 
-const ReportRow = ({ report, onClick, onRetry, onCancel }) => {
+const ReportRow = ({ report, onClick, onRetry, onCancel, isUnviewed }) => {
   const getStatusColor = (status) => {
     switch(status) {
       case 'ready': return '#2e7d32';
@@ -69,11 +70,16 @@ const ReportRow = ({ report, onClick, onRetry, onCancel }) => {
       variants={fadeUp}
       whileHover={{ backgroundColor: "#f8f9fa" }}
       onClick={() => onClick(report)}
+      style={isUnviewed ? {
+        background: "rgba(138,69,34,0.06)",
+        borderLeft: "3px solid #8a4522",
+      } : { borderLeft: "3px solid transparent" }}
     >
       <div className={styles.propertyCell}>
         <div className={styles.propertyAddress}>
           <MapPin size={14} className={styles.propertyPin} />
           <span>{report.address}</span>
+          {isUnviewed && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color: "#8a4522", letterSpacing: 0.5 }}>NEW</span>}
         </div>
       </div>
       <div className={styles.propertyCell}>
@@ -138,6 +144,7 @@ export default function Dashboard() {
   }, []);
   const [wallet, setWallet] = useState(null);
   const [topUpModal, setTopUpModal] = useState(null); // { amount: string, submitting: bool, error: string }
+  const [viewedReportIds, setViewedReportIds] = useState(() => getViewedReportIds());
   const [userProfile, setUserProfile] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm: "" });
@@ -348,6 +355,11 @@ export default function Dashboard() {
     } finally {
       setOtpSubmitting(false);
     }
+  };
+
+  const handleOpenReport = (report) => {
+    setViewedReportIds(markReportViewed(report.id));
+    setSelectedReport(report);
   };
 
   const closeOtpModal = () => {
@@ -693,21 +705,33 @@ export default function Dashboard() {
                 <p className={styles.emptyState}>No reports yet. Check a property to get started.</p>
               ) : (
                 <div className={styles.activityList}>
-                  {reports.slice(0, 5).map((report) => (
-                    <div key={report.id} className={styles.activityItem} onClick={() => setSelectedReport(report)}>
-                      <div className={styles.activityIcon}>
-                        {(report.status === "pending" || report.status === "generating")
-                          ? <Loader2 size={14} className={styles.spinIcon} />
-                          : <FileText size={14} />}
+                  {reports.slice(0, 5).map((report) => {
+                    const isUnviewed = !viewedReportIds.has(report.id);
+                    return (
+                      <div
+                        key={report.id}
+                        className={styles.activityItem}
+                        onClick={() => handleOpenReport(report)}
+                        style={isUnviewed ? {
+                          background: "rgba(138,69,34,0.06)",
+                          borderLeft: "3px solid #8a4522",
+                        } : { borderLeft: "3px solid transparent" }}
+                      >
+                        <div className={styles.activityIcon}>
+                          {(report.status === "pending" || report.status === "generating")
+                            ? <Loader2 size={14} className={styles.spinIcon} />
+                            : <FileText size={14} />}
+                        </div>
+                        <div className={styles.activityContent}>
+                          <span className={styles.activityText}>
+                            <strong>{report.address}</strong> – {report.status_display}
+                            {isUnviewed && <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 700, color: "#8a4522", letterSpacing: 0.5 }}>NEW</span>}
+                          </span>
+                          <span className={styles.activityTime}>{report.created_at_display}</span>
+                        </div>
                       </div>
-                      <div className={styles.activityContent}>
-                        <span className={styles.activityText}>
-                          <strong>{report.address}</strong> – {report.status_display}
-                        </span>
-                        <span className={styles.activityTime}>{report.created_at_display}</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </motion.div>
@@ -741,7 +765,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   filteredReports.map((report) => (
-                    <ReportRow key={report.id} report={report} onClick={() => setSelectedReport(report)} onRetry={handleRetryReport} onCancel={handleCancelReport} />
+                    <ReportRow key={report.id} report={report} isUnviewed={!viewedReportIds.has(report.id)} onClick={handleOpenReport} onRetry={handleRetryReport} onCancel={handleCancelReport} />
                   ))
                 )}
               </div>
