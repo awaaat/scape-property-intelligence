@@ -1048,7 +1048,7 @@ export default function HomePage() {
                   <div className={styles.searchInput}>
                     <motion.input
                       type="text"
-                      placeholder="Enter an address or paste Google Maps link..."
+                      placeholder="Paste the property's Google Maps pin (or type its address) to check it"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
