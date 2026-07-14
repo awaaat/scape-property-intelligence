@@ -107,7 +107,7 @@ export default function PaymentCallback() {
           <p className={styles.redirectNote}>Taking you to your dashboard...</p>
         )}
 
-        {status !== "verifying" && (
+        {(status === "failed" || status === "timeout") && (
           <button className={styles.dashboardBtn} onClick={() => navigate("/dashboard")}>
             Go to Dashboard
           </button>
