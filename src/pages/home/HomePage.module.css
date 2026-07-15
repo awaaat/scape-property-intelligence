@@ -215,7 +215,7 @@
 /* ─── Hero (workspace-style: same look as the logged-in dashboard) ─── */
 .hero {
   position: relative;
-  padding: 160px 0 100px;
+  padding: 120px 0 72px;
   background: var(--bg);
   overflow: hidden;
 }
@@ -264,6 +264,22 @@
   letter-spacing: -0.5px;
   margin: 0 0 16px;
   line-height: 1.1;
+  min-height: 1.3em;
+}
+
+.heroTypedCursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.9em;
+  background: var(--amber);
+  margin-left: 4px;
+  vertical-align: -0.05em;
+  animation: heroCursorBlink 1s steps(1) infinite;
+}
+
+@keyframes heroCursorBlink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
 }
 
 .heroSub {
@@ -475,7 +491,7 @@
 }
 
 @media (max-width: 480px) {
-  .hero { padding: 120px 0 60px; }
+  .hero { padding: 90px 0 48px; }
   .heroStatsRow { grid-template-columns: 1fr; }
 }
 

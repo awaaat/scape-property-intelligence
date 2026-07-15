@@ -424,6 +424,49 @@ export default function HomePage() {
   const canvasRef = useRef(null);
   const heroRef = useRef(null);
 
+  // Small, self-contained type/hold/delete loop for the hero H1 --
+  // deliberately separate from the old SLIDES/22s carousel machinery
+  // below (that stays inert), since this cycles two short phrases on a
+  // much snappier cadence than a 3-part marketing headline needs.
+  const HERO_PHRASES = ["Paste a location pin", "Check a property"];
+  const [heroTypedText, setHeroTypedText] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    let timeoutId;
+
+    const tick = () => {
+      if (cancelled) return;
+      const current = HERO_PHRASES[phraseIdx];
+      if (!deleting) {
+        charIdx += 1;
+        setHeroTypedText(current.slice(0, charIdx));
+        if (charIdx >= current.length) {
+          deleting = true;
+          timeoutId = setTimeout(tick, 1600);
+          return;
+        }
+        timeoutId = setTimeout(tick, 45);
+      } else {
+        charIdx -= 1;
+        setHeroTypedText(current.slice(0, charIdx));
+        if (charIdx <= 0) {
+          deleting = false;
+          phraseIdx = (phraseIdx + 1) % HERO_PHRASES.length;
+          timeoutId = setTimeout(tick, 300);
+          return;
+        }
+        timeoutId = setTimeout(tick, 25);
+      }
+    };
+
+    timeoutId = setTimeout(tick, 300);
+    return () => { cancelled = true; clearTimeout(timeoutId); };
+  }, []);
+
   // Types tag + headline only, restarting each time the slide changes.
   const [tagTyped, setTagTyped] = useState("");
   const [headlineTyped, setHeadlineTyped] = useState("");
@@ -979,7 +1022,10 @@ export default function HomePage() {
                 <Sparkles size={12} /> Property Intelligence Workspace
               </span>
 
-              <h1 className={styles.heroTitle}>Check a property</h1>
+              <h1 className={styles.heroTitle}>
+                {heroTypedText}
+                <span className={styles.heroTypedCursor} />
+              </h1>
               <p className={styles.heroSub}>
                 Drop a pin on the map, or paste a Google Maps link. Get a scored,
                 evidence backed report on that land in seconds -- the same tool
