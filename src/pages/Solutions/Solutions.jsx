@@ -8,35 +8,18 @@ import {
 import PageLayout from "../../components/Layout/PageLayout";
 import { fadeUp, springScale, staggerContainer, VIEWPORT } from "../../styles/animations";
 import { SOLUTIONS, SOLUTIONS_LIST } from "./solutionsData";
+import AnalyzeTool from "./shared/AnalyzeTool";
 
 const ICONS = { Building2, ShieldCheck, Landmark, Award, TrendingUp, CheckCircle, MapPin };
 
 export default function Solutions() {
   const { slug } = useParams();
   const data = SOLUTIONS[slug];
-  const [address, setAddress] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [result, setResult] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
 
   if (!data) return <Navigate to="/property-intel" replace />;
 
   const SegIcon = ICONS[data.icon];
-
-  const handleSearch = async () => {
-    if (!address.trim()) return;
-    setIsSearching(true);
-    setResult(null);
-    await new Promise((res) => setTimeout(res, 1600));
-    setResult({
-      score: 84,
-      trend: "↑ 8.4% YoY",
-      comps: 11,
-      risk: "Low flood risk · Moderate terrain · Good access",
-      amenities: "School 1.2km · Market 0.5km · Hospital 2.8km",
-    });
-    setIsSearching(false);
-  };
 
   return (
     <PageLayout>
@@ -167,62 +150,52 @@ export default function Solutions() {
           <p className="pc-body" style={{ textAlign: "center", maxWidth: 520, margin: "0 auto 28px" }}>
             Drop an address below to see the kind of report you'd hand over.
           </p>
-          <div className="pc-field">
-            <label>Address or Google Maps link</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="e.g. Ruiru, Kiambu County or a maps.google.com link"
-            />
-          </div>
-          <motion.button className="pc-submit-btn" type="button" onClick={handleSearch} disabled={isSearching} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            {isSearching ? (
-              <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} style={{ display: "inline-flex" }}>
-                <Loader2 size={14} style={{ marginRight: 8 }} />
-              </motion.span>
-            ) : (
-              <Search size={14} style={{ marginRight: 8, verticalAlign: "-2px" }} />
-            )}
-            {isSearching ? "Analyzing..." : "Analyze Property"}
-          </motion.button>
-
-          <AnimatePresence>
-            {result && (
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                style={{ marginTop: 28, padding: "28px 32px", background: "var(--bg-raised)", border: "1px solid var(--hairline)", boxShadow: "var(--shadow)", borderRadius: 10 }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 20, paddingBottom: 20, marginBottom: 20, borderBottom: "1px solid var(--hairline)" }}>
-                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 260, delay: 0.1 }} style={{ fontFamily: "var(--font-display)", fontSize: 40, fontWeight: 700, color: "var(--lime)" }}>
-                    {result.score}
+          <AnalyzeTool render={({ address, setAddress, isSearching, result, statusMessage, errorMessage, run, Search, Loader2, motion, AnimatePresence }) => (
+            <>
+              <div className="pc-field">
+                <label>Address or Google Maps link</label>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && run()}
+                  placeholder="e.g. Ruiru, Kiambu County or a maps.google.com link"
+                />
+              </div>
+              <motion.button className="pc-submit-btn" type="button" onClick={run} disabled={isSearching} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                {isSearching ? (
+                  <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} style={{ display: "inline-flex" }}>
+                    <Loader2 size={14} style={{ marginRight: 8 }} />
                   </motion.span>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 0.5 }}>Property Score</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--lime)" }}>{result.trend}</div>
-                  </div>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-                  <div>
-                    <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-dim)", textTransform: "uppercase", marginBottom: 4 }}>Comparable Sales</div>
-                    <div style={{ fontSize: 14, color: "var(--text-h)" }}>{result.comps} nearby transactions checked</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-dim)", textTransform: "uppercase", marginBottom: 4 }}>Risk Factors</div>
-                    <div style={{ fontSize: 14, color: "var(--text-h)" }}>{result.risk}</div>
-                  </div>
-                  <div style={{ gridColumn: "1 / -1" }}>
-                    <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-dim)", textTransform: "uppercase", marginBottom: 4 }}>Nearby Amenities</div>
-                    <div style={{ fontSize: 14, color: "var(--text-h)" }}>{result.amenities}</div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                ) : (
+                  <Search size={14} style={{ marginRight: 8, verticalAlign: "-2px" }} />
+                )}
+                {isSearching ? "Analyzing..." : "Analyze Property"}
+              </motion.button>
+
+              {isSearching && statusMessage && (
+                <div style={{ marginTop: 16, fontSize: 13, color: "var(--text-dim)" }}>{statusMessage}</div>
+              )}
+              {errorMessage && (
+                <div style={{ marginTop: 16, fontSize: 13, color: "#c0392b" }}>{errorMessage}</div>
+              )}
+
+              <AnimatePresence>
+                {result?.pdfUrl && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    style={{ marginTop: 28, padding: "28px 32px", background: "var(--bg-raised)", border: "1px solid var(--hairline)", boxShadow: "var(--shadow)", borderRadius: 10 }}
+                  >
+                    <div style={{ fontSize: 15, color: "var(--text-h)", marginBottom: 16 }}>Your report is ready.</div>
+                    <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer" className="pc-submit-btn" style={{ display: "inline-block", textDecoration: "none" }}>Download Report</a>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )} />
         </div>
       </motion.section>
 

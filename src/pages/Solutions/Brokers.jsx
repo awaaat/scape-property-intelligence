@@ -101,7 +101,7 @@ export default function Brokers() {
         <div className="pc-container">
           <h2 className="pc-heading2" style={{ textAlign: "center" }}>Try it on a real address</h2>
           <p className="pc-body" style={{ textAlign: "center", maxWidth: 520, margin: "0 auto 28px" }}>Drop an address below to see the kind of report you'd hand over.</p>
-          <AnalyzeTool render={({ address, setAddress, isSearching, result, run, Search, Loader2, motion, AnimatePresence }) => (
+          <AnalyzeTool render={({ address, setAddress, isSearching, result, statusMessage, errorMessage, run, Search, Loader2, motion, AnimatePresence }) => (
             <>
               <div className="pc-field">
                 <label>Address or Google Maps link</label>
@@ -111,14 +111,17 @@ export default function Brokers() {
                 {isSearching ? <Loader2 size={14} style={{ marginRight: 8, animation: "spin 0.8s linear infinite" }} /> : <Search size={14} style={{ marginRight: 8, verticalAlign: "-2px" }} />}
                 {isSearching ? "Analyzing..." : "Analyze Property"}
               </motion.button>
+              {isSearching && statusMessage && (
+                <div style={{ marginTop: 16, fontSize: 13, color: "var(--text-dim)" }}>{statusMessage}</div>
+              )}
+              {errorMessage && (
+                <div style={{ marginTop: 16, fontSize: 13, color: "#c0392b" }}>{errorMessage}</div>
+              )}
               <AnimatePresence>
-                {result && (
+                {result?.pdfUrl && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 28, padding: "28px 32px", background: "var(--bg-raised)", border: "1px solid var(--hairline)", borderRadius: 10 }}>
-                    <div style={{ display: "flex", gap: 20, alignItems: "center", paddingBottom: 20, marginBottom: 20, borderBottom: "1px solid var(--hairline)" }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontSize: 40, fontWeight: 700, color: "var(--lime)" }}>{result.score}</span>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--lime)" }}>{result.trend}</div>
-                    </div>
-                    <div style={{ fontSize: 14, color: "var(--text-h)" }}>{result.comps} comparable sales · {result.risk}</div>
+                    <div style={{ fontSize: 15, color: "var(--text-h)", marginBottom: 16 }}>Your report is ready.</div>
+                    <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer" className="pc-submit-btn" style={{ display: "inline-block", textDecoration: "none" }}>Download Report</a>
                   </motion.div>
                 )}
               </AnimatePresence>

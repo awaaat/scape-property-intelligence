@@ -71,7 +71,7 @@ export default function Legal() {
 
         <section style={{ maxWidth: 700, margin: "0 auto 90px", padding: "0 24px" }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, color: "#2b2418", textAlign: "center", marginBottom: 20 }}>Attach a report to your file</h2>
-          <AnalyzeTool render={({ address, setAddress, isSearching, result, run, Search, Loader2 }) => (
+          <AnalyzeTool render={({ address, setAddress, isSearching, result, statusMessage, errorMessage, run, Search, Loader2 }) => (
             <>
               <div style={{ display: "flex", border: "1px solid #2b2418", background: "#fffdf7" }}>
                 <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} onKeyDown={(e) => e.key === "Enter" && run()}
@@ -80,9 +80,15 @@ export default function Legal() {
                   {isSearching ? "Pulling..." : "Attach Report"}
                 </button>
               </div>
-              {result && (
+              {isSearching && statusMessage && (
+                <div style={{ marginTop: 14, fontSize: 13, color: "#7a5a2e", fontFamily: "Georgia, serif" }}>{statusMessage}</div>
+              )}
+              {errorMessage && (
+                <div style={{ marginTop: 14, fontSize: 13, color: "#a6402e", fontFamily: "Georgia, serif" }}>{errorMessage}</div>
+              )}
+              {result?.pdfUrl && (
                 <div style={{ marginTop: 18, padding: "20px 24px", background: "#f0e8d2", border: "1px solid #d8cba8", fontFamily: "Georgia, serif" }}>
-                  Score <strong>{result.score}/100</strong> · {result.risk}
+                  Report ready — <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#2b2418", fontWeight: 700 }}>Download PDF</a>
                 </div>
               )}
             </>

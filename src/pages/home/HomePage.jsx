@@ -14,8 +14,10 @@ import {
   Landmark, ShieldCheck, Layers, GitBranch, Database, Cpu,
   Monitor, Smartphone, Tablet, Send, Copy, ExternalLink,
   PieChart, LineChart, AreaChart, Radar, Compass as CompassIcon, Briefcase,
-  Share2
+  Share2, Download
 } from "lucide-react";
+import usePropertyAnalyze from "../../hooks/usePropertyAnalyze";
+import AnalyzeModals from "../../components/PropertyAnalyze/AnalyzeModals";
 
 // Custom social icons with hover animations
 const FacebookIcon = (props) => (
@@ -403,9 +405,12 @@ export default function HomePage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMsg, setChatMsg] = useState("");
   const [chatLog, setChatLog] = useState([{ from: "bot", text: "Hi! I'm your Scape assistant. Drop an address or ask me anything about property intelligence." }]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState(null);
+  const analyze = usePropertyAnalyze();
+  const {
+    address: searchTerm, setAddress: setSearchTerm, isSearching,
+    result: searchResults, statusMessage: searchStatusMessage, errorMessage: searchErrorMessage,
+    run: handleSearch,
+  } = analyze;
   const [hoveredIndustry, setHoveredIndustry] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [parallaxOffset, setParallaxOffset] = useState(0);
@@ -703,27 +708,6 @@ export default function HomePage() {
       setChatLog(l => [...l, { from: "bot", text: responses[Math.floor(Math.random() * responses.length)] }]);
     }, 600 + Math.random() * 400);
   };
-
-  const handleSearch = useCallback(async () => {
-    if (!searchTerm.trim()) return;
-    setIsSearching(true);
-    setSearchResults(null);
-    try {
-      await new Promise(res => setTimeout(res, 2500));
-      setSearchResults({
-        address: searchTerm,
-        score: Math.floor(Math.random() * 30) + 70,
-        comparableSales: Math.floor(Math.random() * 15) + 5,
-        riskFactors: ['Flood Risk: Low', 'Terrain: Moderate', 'Access: Good'],
-        amenities: ['School: 1.2km', 'Hospital: 2.8km', 'Market: 0.5km'],
-        trend: Math.random() > 0.5 ? '↑ 8.4% YoY' : '↑ 6.2% YoY',
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchTerm]);
 
   const renderStars = (n = 5) => {
     return [...Array(n)].map((_, i) => (
@@ -1144,7 +1128,32 @@ export default function HomePage() {
                     )}
                   </AnimatePresence>
 
-                  {searchResults && !isSearching && (
+                  {searchStatusMessage && isSearching && (
+                    <motion.div
+                      className={styles.searchResults}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                    >
+                      <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} style={{ display: "inline-flex" }}>
+                        <Loader2 size={16} />
+                      </motion.span>
+                      {searchStatusMessage}
+                    </motion.div>
+                  )}
+
+                  {searchErrorMessage && !isSearching && (
+                    <motion.div
+                      className={styles.searchResults}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{ color: "#e0897a" }}
+                    >
+                      {searchErrorMessage}
+                    </motion.div>
+                  )}
+
+                  {searchResults?.pdfUrl && !isSearching && (
                     <motion.div
                       className={styles.searchResults}
                       initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -1152,46 +1161,21 @@ export default function HomePage() {
                       transition={{ type: "spring", stiffness: 200, damping: 20 }}
                     >
                       <div className={styles.resultHeader}>
-                        <motion.span 
-                          className={styles.resultScore}
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
-                        >
-                          {searchResults.score}
-                        </motion.span>
-                        <span className={styles.resultLabel}>Property Score</span>
-                        <span className={styles.resultTrend}>{searchResults.trend}</span>
-                      </div>
-                      <div className={styles.resultDetails}>
-                        {[
-                          { label: "Comparable Sales", value: searchResults.comparableSales },
-                          { label: "Nearby Amenities", value: searchResults.amenities.join(' • ') },
-                          { label: "Risk Factors", value: searchResults.riskFactors.join(' • ') }
-                        ].map((item, idx) => (
-                          <motion.div 
-                            key={idx}
-                            className={styles.resultStat}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + idx * 0.15 }}
-                          >
-                            <span>{item.label}</span>
-                            <strong>{item.value}</strong>
-                          </motion.div>
-                        ))}
+                        <span className={styles.resultLabel}>Your report is ready</span>
                       </div>
                       <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <Link to="/property-intel" className={styles.viewFullReport}>
-                          View Full Report <ArrowRight size={14} />
-                        </Link>
+                        <a href={searchResults.pdfUrl} target="_blank" rel="noopener noreferrer" className={styles.viewFullReport}>
+                          Download Report <Download size={14} />
+                        </a>
                       </motion.div>
                     </motion.div>
                   )}
               </div>
+
+              <AnalyzeModals {...analyze} />
 
               <div className={styles.heroActions}>
                 <motion.div

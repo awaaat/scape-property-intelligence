@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { verifyPayment, fetchReportStatus } from "../../api/billing";
+import { isLoggedIn } from "../../api/auth";
 import styles from "./PaymentCallback.module.css";
 
 // Paystack redirects back with ?reference=... or ?trxref=... depending
@@ -14,6 +15,7 @@ export default function PaymentCallback() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying"); // verifying | success | failed | timeout
   const [message, setMessage] = useState("Confirming your payment...");
+  const [pdfUrl, setPdfUrl] = useState(null);
   const attemptsRef = useRef(0);
 
   const reference = searchParams.get("reference") || searchParams.get("trxref");
@@ -47,13 +49,16 @@ export default function PaymentCallback() {
               const report = await fetchReportStatus(reportId);
               if (report.status === "ready") {
                 setMessage("Your report is ready.");
+                if (!cancelled) setPdfUrl(report.pdf_storage_path);
               }
             } catch {
-              // non-fatal — dashboard will show it once it's ready regardless
+              // non-fatal — logged-in users will see it on the dashboard once ready regardless
             }
           }
 
-          if (!cancelled) {
+          // Anonymous visitors (checkout started from a public page) have
+          // no dashboard to land on — keep them here instead of redirecting.
+          if (!cancelled && isLoggedIn()) {
             setTimeout(() => {
               if (!cancelled) navigate("/dashboard");
             }, AUTO_REDIRECT_DELAY_MS);
@@ -103,8 +108,18 @@ export default function PaymentCallback() {
         </h2>
         <p>{message}</p>
 
-        {status === "success" && (
+        {status === "success" && isLoggedIn() && (
           <p className={styles.redirectNote}>Taking you to your dashboard...</p>
+        )}
+
+        {status === "success" && !isLoggedIn() && pdfUrl && (
+          <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className={styles.dashboardBtn} style={{ textDecoration: "none", display: "inline-block" }}>
+            Download Your Report
+          </a>
+        )}
+
+        {status === "success" && !isLoggedIn() && !pdfUrl && (
+          <p className={styles.redirectNote}>Your report is being generated — check back shortly.</p>
         )}
 
         {(status === "failed" || status === "timeout") && (

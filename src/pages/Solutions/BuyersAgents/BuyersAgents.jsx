@@ -72,7 +72,7 @@ export default function BuyersAgents() {
         <motion.section className="pc-section" initial="hidden" whileInView="visible" viewport={VIEWPORT} variants={fadeUp} style={{ background: "#0f1a1e" }}>
           <div className="pc-container">
             <h2 style={{ fontFamily: "var(--font-display)", color: "#f2f7f8", textAlign: "center", fontSize: 24, marginBottom: 24 }}>Verify a listing right now</h2>
-            <AnalyzeTool render={({ address, setAddress, isSearching, result, run, Search, Loader2, motion: M, AnimatePresence }) => (
+            <AnalyzeTool render={({ address, setAddress, isSearching, result, statusMessage, errorMessage, run, Search, Loader2, motion: M, AnimatePresence }) => (
               <div style={{ maxWidth: 560, margin: "0 auto" }}>
                 <div style={{ display: "flex", border: "1px solid rgba(111,179,194,0.3)", background: "rgba(255,255,255,0.03)" }}>
                   <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} onKeyDown={(e) => e.key === "Enter" && run()}
@@ -83,13 +83,16 @@ export default function BuyersAgents() {
                     {isSearching ? "Verifying..." : "Verify"}
                   </button>
                 </div>
+                {isSearching && statusMessage && (
+                  <div style={{ marginTop: 14, fontSize: 13, color: "#a8d3db" }}>{statusMessage}</div>
+                )}
+                {errorMessage && (
+                  <div style={{ marginTop: 14, fontSize: 13, color: "#e0897a" }}>{errorMessage}</div>
+                )}
                 <AnimatePresence>
-                  {result && (
+                  {result?.pdfUrl && (
                     <M.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ marginTop: 20, padding: 24, background: "rgba(111,179,194,0.08)", border: "1px solid rgba(111,179,194,0.25)" }}>
-                      <div style={{ display: "flex", gap: 16, alignItems: "baseline" }}>
-                        <span style={{ fontFamily: "var(--font-display)", fontSize: 34, color: "#6fb3c2", fontWeight: 700 }}>{result.score}</span>
-                        <span style={{ color: "#f2f7f8", fontSize: 13 }}>{result.risk}</span>
-                      </div>
+                      <a href={result.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#6fb3c2", fontWeight: 700, fontSize: 15, textDecoration: "none" }}>Download Report</a>
                     </M.div>
                   )}
                 </AnimatePresence>
