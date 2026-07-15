@@ -32,8 +32,8 @@ export default function Footer() {
 
         <div>
           <h4 className={styles.footH}>Contact</h4>
-          <p className={styles.footContactLine}><Mail size={14} /> hello@scapeintel.com</p>
-          <p className={styles.footContactLine}><Phone size={14} /> +1 (757) 598-0582</p>
+          <p className={styles.footContactLine}><Mail size={14} /> info@scapedatasolutions.com</p>
+          <p className={styles.footContactLine}><Phone size={14} /> +254 718 889 559</p>
           <p className={styles.footContactLine}><MapPin size={14} /> Nairobi, Kenya</p>
         </div>
       </div>
