@@ -44,6 +44,24 @@ export default function PropertyIntel() {
     <PageLayout>
       <div className={styles.page}>
         <div className={styles.console}>
+          <div className={styles.scanPane}>
+            {[70, 130, 190].map((r, i) => (
+              <motion.div
+                key={r}
+                className={styles.radarRing}
+                style={{ width: r * 2, height: r * 2 }}
+                animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.1, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+              />
+            ))}
+            <motion.div
+              className={styles.pinCore}
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <span className={styles.scanLabel}>Live property scan</span>
+          </div>
+
           <div className={styles.formPane}>
             <span className={styles.kicker}>{segment.eyebrow}</span>
             <h1 className={styles.h1}>{segment.title}</h1>
