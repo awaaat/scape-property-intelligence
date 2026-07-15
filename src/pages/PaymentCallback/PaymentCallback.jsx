@@ -9,6 +9,8 @@ import styles from "./PaymentCallback.module.css";
 const POLL_INTERVAL_MS = 2500;
 const MAX_POLL_ATTEMPTS = 24; // ~60s total, matches M-Pesa's own 180s prompt window with margin to spare on the shorter card-payment path
 const AUTO_REDIRECT_DELAY_MS = 2000; // time to actually see the success message before we move on
+const REPORT_POLL_INTERVAL_MS = 3000;
+const REPORT_MAX_POLL_ATTEMPTS = 40; // ~2 minutes -- matches usePropertyAnalyze.js's pollReport()
 
 export default function PaymentCallback() {
   const [searchParams] = useSearchParams();
@@ -29,6 +31,41 @@ export default function PaymentCallback() {
 
     let cancelled = false;
 
+    const pollReportUntilReady = (reportId, attempt = 0) => {
+      if (cancelled) return;
+      fetchReportStatus(reportId)
+        .then((report) => {
+          if (cancelled) return;
+          if (report.status === "ready") {
+            setMessage("Your report is ready.");
+            setPdfUrl(report.pdf_storage_path);
+            if (isLoggedIn()) {
+              setTimeout(() => {
+                if (!cancelled) navigate("/dashboard");
+              }, AUTO_REDIRECT_DELAY_MS);
+            }
+            return;
+          }
+          if (report.status === "failed") {
+            setMessage("Report generation failed. Please try again, or contact support if you were charged.");
+            return;
+          }
+          if (attempt >= REPORT_MAX_POLL_ATTEMPTS) {
+            setMessage("Payment confirmed, but this is taking longer than expected. Check your email — we'll send the report there once it's done.");
+            return;
+          }
+          setTimeout(() => pollReportUntilReady(reportId, attempt + 1), REPORT_POLL_INTERVAL_MS);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          if (attempt >= REPORT_MAX_POLL_ATTEMPTS) {
+            setMessage("Payment confirmed, but we could not confirm report status. Check your email shortly.");
+            return;
+          }
+          setTimeout(() => pollReportUntilReady(reportId, attempt + 1), REPORT_POLL_INTERVAL_MS);
+        });
+    };
+
     const poll = async () => {
       try {
         const txn = await verifyPayment(reference);
@@ -39,26 +76,15 @@ export default function PaymentCallback() {
           setStatus("success");
           setMessage("Payment confirmed. Your report is now being generated.");
 
-          // Also poll the actual report status briefly, so we can route
-          // straight to it once ready rather than dumping the user back
-          // on a static success screen.
+          // Poll the actual report status until it's ready/failed, instead
+          // of checking once and giving up -- a report almost never
+          // finishes in the instant payment confirms, and anonymous
+          // visitors have no dashboard to land on later to catch it.
           const reportId = sessionStorage.getItem("pending_report_id");
           if (reportId) {
             sessionStorage.removeItem("pending_report_id");
-            try {
-              const report = await fetchReportStatus(reportId);
-              if (report.status === "ready") {
-                setMessage("Your report is ready.");
-                if (!cancelled) setPdfUrl(report.pdf_storage_path);
-              }
-            } catch {
-              // non-fatal — logged-in users will see it on the dashboard once ready regardless
-            }
-          }
-
-          // Anonymous visitors (checkout started from a public page) have
-          // no dashboard to land on — keep them here instead of redirecting.
-          if (!cancelled && isLoggedIn()) {
+            pollReportUntilReady(reportId);
+          } else if (!cancelled && isLoggedIn()) {
             setTimeout(() => {
               if (!cancelled) navigate("/dashboard");
             }, AUTO_REDIRECT_DELAY_MS);
