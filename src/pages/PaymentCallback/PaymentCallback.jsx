@@ -140,7 +140,7 @@ export default function PaymentCallback() {
 
         {status === "success" && !isLoggedIn() && pdfUrl && (
           <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className={styles.dashboardBtn} style={{ textDecoration: "none", display: "inline-block" }}>
-            Download Your Report
+            View your Listing Details
           </a>
         )}
 

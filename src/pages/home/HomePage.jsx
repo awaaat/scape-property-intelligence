@@ -969,295 +969,209 @@ export default function HomePage() {
       >
 
       <main>
-        {/* ─── HERO ─── */}
+        {/* ─── HERO (workspace-style, matches the logged-in dashboard) ─── */}
         <section className={styles.hero} ref={heroRef}>
-          <div className={styles.heroBgWrap}>
-            <AnimatePresence mode="wait">
-              <motion.img
-                key={slide}
-                src={SLIDES[slide].img}
-                alt=""
-                className={styles.heroBgImg}
-                style={{
-                  transform: `scale(1.05) translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`
-                }}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1 }}
-                transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
-              />
-            </AnimatePresence>
-            <div className={styles.heroOverlay} />
-            <motion.div
-              className={styles.heroGlow}
-              animate={{ 
-                backgroundColor: SLIDES[slide].color,
-                opacity: [0.6, 0.8, 0.6]
-              }}
-              transition={{ 
-                duration: 0.8,
-                opacity: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-              }}
-            />
-          </div>
+          <div className={styles.heroGridBg} />
 
           <div className={`${styles.container} ${styles.heroInner}`}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`hero-${slide}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <motion.span
-                  className={styles.heroTag}
-                  animate={{ backgroundColor: `${SLIDES[slide].color}33` }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Sparkles size={12} /> {tagTyped}
-                </motion.span>
-                <h1
-                  className={styles.heroTitle}
-                  style={{ marginLeft: slide === 1 ? -22 : 0 }}
-                >
-                  <span>{headlineTyped}</span>
-                  <span
-                    className={styles.heroTitleAccent}
-                    style={{ color: SLIDES[slide].color }}
-                  >
-                    {headline2Typed}
-                  </span>
-                </h1>
-              </motion.div>
-            </AnimatePresence>
+            <div className={styles.heroLeft}>
+              <span className={styles.heroEyebrow}>
+                <Sparkles size={12} /> Property Intelligence Workspace
+              </span>
 
-            <div className={styles.heroContent}>
+              <h1 className={styles.heroTitle}>Check a property</h1>
               <p className={styles.heroSub}>
-                Drop a pin on the map, or paste a Google Maps link. In seconds you get a plain,
-                evidence backed report on that land: what it's worth, what's nearby, and what
-                could go wrong.
+                Drop a pin on the map, or paste a Google Maps link. Get a scored,
+                evidence backed report on that land in seconds -- the same tool
+                your dashboard uses.
               </p>
 
               <div className={styles.heroSearch}>
-                <motion.div
-                  style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, color: "#b5602f", fontWeight: 700, fontSize: 13, letterSpacing: 0.3 }}
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <MapPin size={14} /> Drop your pin here to get started
-                </motion.div>
-                  <div className={styles.searchInput}>
-                    <motion.input
-                      type="text"
-                      autoFocus
-                      placeholder="Paste a Google Maps pin, or type an address, to check it now"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                      animate={{
-                        boxShadow: [
-                          "0 0 0 0 rgba(181, 96, 47, 0.35)",
-                          "0 0 0 8px rgba(181, 96, 47, 0)",
-                          "0 0 0 0 rgba(181, 96, 47, 0.35)"
-                        ]
-                      }}
-                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                      whileFocus={{ scale: 1.02, boxShadow: "0 0 0 3px rgba(181, 96, 47, 0.2)" }}
-                    />
-                    <motion.button
-                      onClick={handleSearch}
-                      whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(181, 96, 47, 0.3)" }}
-                      whileTap={{ scale: 0.95 }}
-                      disabled={isSearching}
-                    >
-                      {isSearching ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        >
-                          <Loader2 size={18} />
-                        </motion.div>
-                      ) : (
-                        <Search size={18} />
-                      )}
-                      <span>Analyze</span>
-                    </motion.button>
-                  </div>
-
-                  <AnimatePresence>
-                    {isSearching && (
-                      <motion.div
-                        className={styles.searchProcessing}
-                        initial={{ opacity: 0, maxHeight: 0 }}
-                        animate={{ opacity: 1, maxHeight: 200 }}
-                        exit={{ opacity: 0, maxHeight: 0 }}
-                        style={{ overflow: 'hidden' }}
-                      >
-                        <div className={styles.processingSteps}>
-                          {[
-                            { label: "Locating property...", delay: 0.2 },
-                            { label: "Analyzing comparable sales...", delay: 0.7 },
-                            { label: "Checking risk factors...", delay: 1.2 },
-                            { label: "Generating report...", delay: 1.7 }
-                          ].map((step, idx) => (
-                            <motion.div
-                              key={idx}
-                              className={styles.processingStep}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: step.delay }}
-                            >
-                              <motion.span 
-                                className={styles.stepDot}
-                                animate={{ scale: [1, 1.5, 1] }}
-                                transition={{ duration: 1, repeat: Infinity, delay: idx * 0.2 }}
-                              />
-                              {step.label}
-                            </motion.div>
-                          ))}
-                        </div>
-                        <div className={styles.processingBar}>
-                          <motion.div
-                            className={styles.processingFill}
-                            animate={{ width: '100%' }}
-                            transition={{ duration: 2.5, ease: 'easeInOut' }}
-                          />
-                        </div>
+                <div className={styles.searchInput}>
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Paste a Google Maps pin, or type an address, to check it now"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <button onClick={handleSearch} disabled={isSearching}>
+                    {isSearching ? (
+                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                        <Loader2 size={18} />
                       </motion.div>
+                    ) : (
+                      <Search size={18} />
                     )}
-                  </AnimatePresence>
+                    <span>Analyze</span>
+                  </button>
+                </div>
 
-                  {searchStatusMessage && isSearching && (
+                <AnimatePresence>
+                  {isSearching && (
                     <motion.div
-                      className={styles.searchResults}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{ display: "flex", alignItems: "center", gap: 10 }}
+                      className={styles.searchProcessing}
+                      initial={{ opacity: 0, maxHeight: 0 }}
+                      animate={{ opacity: 1, maxHeight: 200 }}
+                      exit={{ opacity: 0, maxHeight: 0 }}
+                      style={{ overflow: 'hidden' }}
                     >
-                      <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} style={{ display: "inline-flex" }}>
-                        <Loader2 size={16} />
-                      </motion.span>
-                      {searchStatusMessage}
-                    </motion.div>
-                  )}
-
-                  {searchErrorMessage && !isSearching && (
-                    <motion.div
-                      className={styles.searchResults}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{ color: "#e0897a" }}
-                    >
-                      {searchErrorMessage}
-                    </motion.div>
-                  )}
-
-                  {searchResults?.pdfUrl && !isSearching && (
-                    <motion.div
-                      className={styles.searchResults}
-                      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                    >
-                      <div className={styles.resultHeader}>
-                        <span className={styles.resultLabel}>Your report is ready</span>
+                      <div className={styles.processingSteps}>
+                        {[
+                          { label: "Locating property...", delay: 0.2 },
+                          { label: "Analyzing comparable sales...", delay: 0.7 },
+                          { label: "Checking risk factors...", delay: 1.2 },
+                          { label: "Generating report...", delay: 1.7 }
+                        ].map((step, idx) => (
+                          <motion.div
+                            key={idx}
+                            className={styles.processingStep}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: step.delay }}
+                          >
+                            <motion.span
+                              className={styles.stepDot}
+                              animate={{ scale: [1, 1.5, 1] }}
+                              transition={{ duration: 1, repeat: Infinity, delay: idx * 0.2 }}
+                            />
+                            {step.label}
+                          </motion.div>
+                        ))}
                       </div>
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <a href={searchResults.pdfUrl} target="_blank" rel="noopener noreferrer" className={styles.viewFullReport}>
-                          Download Report <Download size={14} />
-                        </a>
-                      </motion.div>
+                      <div className={styles.processingBar}>
+                        <motion.div
+                          className={styles.processingFill}
+                          animate={{ width: '100%' }}
+                          transition={{ duration: 2.5, ease: 'easeInOut' }}
+                        />
+                      </div>
                     </motion.div>
                   )}
+                </AnimatePresence>
+
+                {searchStatusMessage && isSearching && (
+                  <motion.div
+                    className={styles.searchResults}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ display: "flex", alignItems: "center", gap: 10 }}
+                  >
+                    <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} style={{ display: "inline-flex" }}>
+                      <Loader2 size={16} />
+                    </motion.span>
+                    {searchStatusMessage}
+                  </motion.div>
+                )}
+
+                {searchErrorMessage && !isSearching && (
+                  <motion.div
+                    className={styles.searchResults}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ color: "#b3392b" }}
+                  >
+                    {searchErrorMessage}
+                  </motion.div>
+                )}
+
+                {searchResults?.pdfUrl && !isSearching && (
+                  <motion.div
+                    className={styles.searchResults}
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  >
+                    <div className={styles.resultHeader}>
+                      <span className={styles.resultLabel}>Your report is ready</span>
+                    </div>
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <a href={searchResults.pdfUrl} target="_blank" rel="noopener noreferrer" className={styles.viewFullReport}>
+                        View your Listing Details <Download size={14} />
+                      </a>
+                    </motion.div>
+                  </motion.div>
+                )}
               </div>
 
               <AnalyzeModals {...analyze} />
 
               <div className={styles.heroActions}>
-                <motion.div
-                  whileHover={{ scale: 1.05, boxShadow: "0 12px 35px rgba(181, 96, 47, 0.4)" }}
-                  whileTap={{ scale: 0.95 }}
-                  className={styles.ctaWrapper}
-                >
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className={styles.ctaWrapper}>
                   <a href="https://app.scapedatasolutions.com/signup" className={styles.ctaPrimary} onClick={addRipple}>
                     {ripples.map(r => (
-                      <motion.span 
-                        key={r.id} 
-                        className={styles.ripple} 
+                      <motion.span
+                        key={r.id}
+                        className={styles.ripple}
                         style={{ left: r.x, top: r.y }}
-                        initial={{ scale: 0, opacity: 0.6 }}
+                        initial={{ scale: 0, opacity: 0.5 }}
                         animate={{ scale: 4, opacity: 0 }}
                         transition={{ duration: 0.7 }}
                       />
                     ))}
-                    Start Free Trial <ArrowRight size={16} />
+                    Open Full Workspace <ArrowRight size={16} />
                   </a>
                 </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <a href="https://app.scapedatasolutions.com/sample_report.pdf" target="_blank" rel="noopener noreferrer" className={styles.ctaGhost}>
                     <Eye size={15} /> See Example Report
                   </a>
                 </motion.div>
               </div>
+            </div>
 
-              <div className={styles.heroStats}>
+            <div className={styles.heroRight}>
+              <motion.div
+                className={styles.previewCard}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <div className={styles.previewHeader}>
+                  <span>Sample report</span>
+                  <span className={styles.previewBadge}>Example</span>
+                </div>
+                <div className={styles.previewScoreRow}>
+                  <div className={styles.previewScoreCircle}>84</div>
+                  <div>
+                    <strong>Investment score</strong>
+                    <p>Kiambu Road, Ruiru — 0.4 acres</p>
+                  </div>
+                </div>
+                <div className={styles.previewFactors}>
+                  {[
+                    { label: "Access road", val: "Tarmac, 80m away" },
+                    { label: "Nearest school", val: "1.2 km" },
+                    { label: "Flood risk", val: "Low" },
+                    { label: "Price vs comparable sales", val: "6% below average" },
+                  ].map((f, i) => (
+                    <div key={i} className={styles.previewFactorRow}>
+                      <span><CheckCircle size={13} /> {f.label}</span>
+                      <strong>{f.val}</strong>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              <div className={styles.heroStatsRow}>
                 {[
-                  { val: "84 / 100", label: "Example plot score" },
-                  { val: "98%", label: "Data Accuracy" },
-                  { val: "12+", label: "Data Sources" }
+                  { val: "12+", label: "Data sources" },
+                  { val: "98%", label: "Data accuracy" },
+                  { val: "<2s", label: "Report time" }
                 ].map((stat, idx) => (
-                  <motion.div 
+                  <motion.div
                     key={idx}
-                    className={styles.heroStat}
-                    whileHover={{ y: -5 }}
+                    className={styles.heroStatCard}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + idx * 0.1 }}
+                    whileHover={{ y: -3 }}
                   >
                     <span className={styles.heroStatVal}>{stat.val}</span>
                     <span className={styles.heroStatLbl}>{stat.label}</span>
-                    {idx < 2 && <div className={styles.heroStatDivider} />}
                   </motion.div>
                 ))}
-              </div>
-
-              <div className={styles.heroControls}>
-                  <motion.button
-                    className={styles.heroArrow}
-                    onClick={() => setSlide(s => (s - 1 + SLIDES.length) % SLIDES.length)}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="Previous slide"
-                  >
-                    <ChevronLeft size={16} />
-                  </motion.button>
-                  <div className={styles.heroDots}>
-                    {SLIDES.map((_, i) => (
-                      <motion.button
-                        key={i}
-                        className={`${styles.heroDot}${i === slide ? " " + styles.heroDotOn : ""}`}
-                        onClick={() => setSlide(i)}
-                        aria-label={`Go to slide ${i + 1}`}
-                        whileHover={{ scale: 1.3 }}
-                        whileTap={{ scale: 0.8 }}
-                        animate={i === slide ? { scale: [1, 1.3, 1] } : {}}
-                        transition={{ duration: 0.4 }}
-                      />
-                    ))}
-                  </div>
-                <motion.button
-                  className={styles.heroArrow}
-                  onClick={() => setSlide(s => (s + 1) % SLIDES.length)}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                  aria-label="Next slide"
-                >
-                  <ChevronRight size={16} />
-                </motion.button>
               </div>
             </div>
           </div>
