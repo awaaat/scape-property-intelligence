@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, MapPin, TrendingUp, ShieldCheck, Loader2 } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { MapPin, TrendingUp, ShieldCheck, ArrowRight, MousePointerClick, ScanSearch, FileCheck2 } from "lucide-react";
 import PageLayout from "../../components/Layout/PageLayout";
 import styles from "./PropertyIntel.module.css";
 import SEO from "../../components/SEO/SEO";
@@ -15,29 +14,28 @@ const SEGMENTS = {
 };
 const DEFAULT_SEGMENT = { eyebrow: "CHECK A PROPERTY", title: "Drop a pin, get a report", lead: "Paste an address or a Google Maps link and we'll score it against real comparable sales, road access, and risk factors." };
 
-const STEPS = ["Locating pin...", "Pulling comparable sales...", "Checking risk factors...", "Compiling report..."];
+const HOW_IT_WORKS_STEPS = [
+  {
+    icon: MousePointerClick,
+    title: "Drop a pin or paste a link",
+    text: "Give us an address, a dropped pin, or a Google Maps link -- whatever you have on hand for the plot.",
+  },
+  {
+    icon: ScanSearch,
+    title: "We check comps, roads, and risk",
+    text: "We pull real nearby sale prices, road and access data, school and hospital proximity, and flood/terrain risk for that exact location.",
+  },
+  {
+    icon: FileCheck2,
+    title: "Get your report in seconds",
+    text: "A plain, evidence-backed report lands with a score you can show a buyer, bank, or lawyer -- not a guess.",
+  },
+];
 
 export default function PropertyIntel() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const segment = SEGMENTS[searchParams.get("for")] || DEFAULT_SEGMENT;
-
-  const [address, setAddress] = useState("");
-  const [scanning, setScanning] = useState(false);
-  const [logIdx, setLogIdx] = useState(-1);
-  const [result, setResult] = useState(null);
-
-  const runScan = async () => {
-    if (!address.trim() || scanning) return;
-    setResult(null);
-    setScanning(true);
-    for (let i = 0; i < STEPS.length; i++) {
-      setLogIdx(i);
-      await new Promise((r) => setTimeout(r, 550));
-    }
-    setResult({ score: 84, trend: "↑ 8.4% YoY", comps: 11, risk: "Low flood risk", amenities: "School 1.2km" });
-    setScanning(false);
-    setLogIdx(-1);
-  };
 
   return (
     
@@ -46,69 +44,36 @@ export default function PropertyIntel() {
     <PageLayout>
       <div className={styles.page}>
         <div className={styles.console}>
-          <div className={styles.scanPane}>
-            {[70, 130, 190].map((r, i) => (
-              <motion.div
-                key={r}
-                className={styles.radarRing}
-                style={{ width: r * 2, height: r * 2 }}
-                animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.1, 0.5] }}
-                transition={{ duration: 3, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
-              />
-            ))}
-            <motion.div className={styles.pinCore} animate={{ scale: scanning ? [1, 1.3, 1] : 1 }} transition={{ duration: 0.8, repeat: scanning ? Infinity : 0 }} />
-            <span className={styles.scanLabel}>{scanning ? STEPS[logIdx] : "Awaiting input"}</span>
-          </div>
-
           <div className={styles.formPane}>
             <span className={styles.kicker}>{segment.eyebrow}</span>
             <h1 className={styles.h1}>{segment.title}</h1>
             <p className={styles.lead}>{segment.lead}</p>
 
-            <div className={styles.inputRow}>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && runScan()}
-                placeholder="e.g. Ruiru, Kiambu County or a maps.google.com link"
-              />
-              <button type="button" onClick={runScan} disabled={scanning}>
-                {scanning ? <Loader2 size={14} className="pc-spin" style={{ animation: "spin 0.8s linear infinite" }} /> : <Search size={14} />}
-                {scanning ? "Scanning" : "Analyze"}
-              </button>
+            <div className={styles.howItWorksSteps}>
+              {HOW_IT_WORKS_STEPS.map((step, i) => (
+                <motion.div
+                  key={step.title}
+                  className={styles.howItWorksStep}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.12 }}
+                >
+                  <span className={styles.howItWorksStepNum}>{i + 1}</span>
+                  <step.icon size={20} />
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </motion.div>
+              ))}
             </div>
 
-            <AnimatePresence>
-              {scanning && (
-                <motion.div className={styles.logBox} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  {STEPS.slice(0, logIdx + 1).map((s, i) => (
-                    <motion.div key={s} className={styles.logLine} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
-                      <span className={styles.logDot} /> {s}
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {result && (
-                <motion.div className={styles.resultCard} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 220, damping: 20 }}>
-                  <div className={styles.resultTop}>
-                    <span className={styles.resultScore}>{result.score}</span>
-                    <div className={styles.resultMeta}>
-                      <span>Property Score</span>
-                      <span>{result.trend}</span>
-                    </div>
-                  </div>
-                  <div className={styles.resultGrid}>
-                    <div><span>Comparable Sales</span><strong>{result.comps} nearby transactions</strong></div>
-                    <div><span>Risk</span><strong>{result.risk}</strong></div>
-                    <div><span>Nearest School</span><strong>{result.amenities}</strong></div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <button
+              type="button"
+              className={styles.howItWorksCta}
+              onClick={() => navigate("/", { state: { scrollToPin: true } })}
+            >
+              Click here to check a property <ArrowRight size={16} />
+            </button>
           </div>
         </div>
 

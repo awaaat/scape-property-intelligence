@@ -181,9 +181,53 @@
 .includeCell h3 { font-family: var(--font-display); color: #faf8ef; font-size: 16px; margin: 12px 0 8px; }
 .includeCell p { color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; margin: 0; }
 
+.howItWorksSteps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.howItWorksStep {
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  padding: 24px 22px;
+}
+.howItWorksStep svg { color: #8fc2d6; margin-bottom: 10px; }
+.howItWorksStep h3 { font-family: var(--font-display); color: #faf8ef; font-size: 15.5px; margin: 0 0 8px; }
+.howItWorksStep p { color: rgba(255,255,255,0.55); font-size: 13px; line-height: 1.6; margin: 0; }
+
+.howItWorksStepNum {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+}
+
+.howItWorksCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 32px;
+  background: #8fc2d6;
+  color: #10141a;
+  border: none;
+  padding: 14px 26px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.howItWorksCta:hover { opacity: 0.9; transform: translateY(-1px); }
+
 @media (max-width: 900px) {
   .console { grid-template-columns: 1fr; }
   .scanPane { min-height: 260px; padding: 30px; }
   .formPane { padding: 40px 28px; }
   .includesRow { grid-template-columns: 1fr; }
+  .howItWorksSteps { grid-template-columns: 1fr; }
 }
