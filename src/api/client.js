@@ -2,6 +2,13 @@ import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
+// No request should be allowed to hang indefinitely — this matters a lot
+// during `vite build && node prerender.js`, where the API backend usually
+// isn't running at all. Without a timeout, a dead/unreachable BASE_URL can
+// leave a request pending forever, which stalls Puppeteer's `networkidle0`
+// wait until it hits its own (much longer) navigation timeout.
+const REQUEST_TIMEOUT_MS = 8000;
+
 const ACCESS_KEY = "scape_access_token";
 const REFRESH_KEY = "scape_refresh_token";
 
@@ -18,7 +25,7 @@ export const tokenStorage = {
   },
 };
 
-const client = axios.create({ baseURL: BASE_URL });
+const client = axios.create({ baseURL: BASE_URL, timeout: REQUEST_TIMEOUT_MS });
 
 client.interceptors.request.use((config) => {
   const access = tokenStorage.getAccess();
@@ -48,7 +55,7 @@ client.interceptors.response.use(
       try {
         if (!refreshPromise) {
           refreshPromise = axios
-            .post(`${BASE_URL}/users/token/refresh/`, { refresh })
+            .post(`${BASE_URL}/users/token/refresh/`, { refresh }, { timeout: REQUEST_TIMEOUT_MS })
             .finally(() => { refreshPromise = null; });
         }
         const { data } = await refreshPromise;

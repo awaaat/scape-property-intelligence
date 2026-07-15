@@ -18,7 +18,28 @@ const ROUTES = [
   "/solutions/legal",
 ];
 
+// Pages should be considered "ready" once the DOM (and react-helmet-async's
+// head tags) have been written — not once the network has fully gone idle.
+// Some pages fire live API calls on mount (e.g. /pricing), and that backend
+// usually isn't running at all during a build. Waiting on `networkidle0`
+// there means a single dead/unreachable request can stall the whole build
+// until Puppeteer's own timeout fires.
+const NAV_TIMEOUT_MS = 30000;
+
 const isServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+function resolveLocalChromePath() {
+  if (process.env.CHROME_EXECUTABLE_PATH) return process.env.CHROME_EXECUTABLE_PATH;
+  const candidates = ["/usr/bin/google-chrome", "/usr/bin/chromium-browser", "/usr/bin/chromium"];
+  const found = candidates.find((p) => fs.existsSync(p));
+  if (!found) {
+    throw new Error(
+      `No Chrome/Chromium executable found. Checked: ${candidates.join(", ")}. ` +
+      `Set CHROME_EXECUTABLE_PATH to point at your installed browser.`
+    );
+  }
+  return found;
+}
 
 async function launchBrowser() {
   if (isServerless) {
@@ -32,10 +53,7 @@ async function launchBrowser() {
   return puppeteerCore.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    executablePath:
-      process.env.CHROME_EXECUTABLE_PATH ||
-      "/usr/bin/google-chrome" ||
-      "/usr/bin/chromium-browser",
+    executablePath: resolveLocalChromePath(),
   });
 }
 
@@ -49,16 +67,29 @@ async function run() {
   const browser = await launchBrowser();
   const page = await browser.newPage();
 
+  page.on("pageerror", (err) => {
+    console.warn(`  [pageerror] ${err.message}`);
+  });
+  page.on("console", (msg) => {
+    if (msg.type() === "error") console.warn(`  [console.error] ${msg.text()}`);
+  });
+
   for (const route of ROUTES) {
     const url = `${base}${route}`;
-    await page.goto(url, { waitUntil: "networkidle0" });
-    await page.waitForSelector("title");
-    const html = await page.content();
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT_MS });
+      await page.waitForSelector("title", { timeout: NAV_TIMEOUT_MS });
+      const html = await page.content();
 
-    const outDir = route === "/" ? "dist" : path.join("dist", route);
-    fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(path.join(outDir, "index.html"), html);
-    console.log(`Prerendered ${route} -> ${outDir}/index.html`);
+      const outDir = route === "/" ? "dist" : path.join("dist", route);
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(path.join(outDir, "index.html"), html);
+      console.log(`Prerendered ${route} -> ${outDir}/index.html`);
+    } catch (err) {
+      await browser.close();
+      server.httpServer.close();
+      throw new Error(`Failed to prerender ${route}: ${err.message}`);
+    }
   }
 
   await browser.close();
