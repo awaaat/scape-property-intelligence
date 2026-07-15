@@ -446,7 +446,7 @@ export default function HomePage() {
         setHeroTypedText(current.slice(0, charIdx));
         if (charIdx >= current.length) {
           deleting = true;
-          timeoutId = setTimeout(tick, 5000);
+          timeoutId = setTimeout(tick, 14000);
           return;
         }
         timeoutId = setTimeout(tick, 45);
