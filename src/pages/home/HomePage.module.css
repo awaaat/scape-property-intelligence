@@ -275,6 +275,15 @@
   width: 100%;
 }
 
+/* Tag+headline is the first child of .heroInner (rendered outside
+   .heroContent so it can animate independently). Give it a stable width
+   so it wraps the same way on every slide, on top of the reserved
+   heights above -- between the two, its box size never changes, so the
+   pin input / CTAs / stats in .heroContent below it never shift. */
+.heroInner > div:first-child {
+  width: 100%;
+}
+
 .heroTag {
   display: inline-flex;
   align-items: center;
@@ -288,6 +297,8 @@
   margin-bottom: 24px;
   border: 1px solid rgba(53, 96, 110, 0.3);
   transition: background-color 0.8s ease;
+  min-height: 1.7em;
+  white-space: nowrap;
 }
 
 .heroTitle {
@@ -300,6 +311,7 @@
   display: flex;
   flex-direction: column;
   letter-spacing: -0.5px;
+  min-height: 2.3em;
 }
 
 .heroTitleAccent {
