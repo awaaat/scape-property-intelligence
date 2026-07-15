@@ -13,7 +13,7 @@ export default function AnalyzeModals({
       {emailModal && (
         <ModalShell key="email-modal" onClose={closeEmailModal}>
           <h3 style={modalTitleStyle}>Where should we send this?</h3>
-          <p style={modalSubStyle}>One quick step before we pull your report — enter the email to receive it at.</p>
+          <p style={modalSubStyle}>One quick step before we pull your report — enter your email to unlock it.</p>
           <form onSubmit={submitEmailModal} style={{ marginTop: 16 }}>
             <input
               type="email"

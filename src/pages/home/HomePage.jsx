@@ -1201,7 +1201,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <a href="https://app.scapedatasolutions.com/property-intel" className={styles.ctaGhost}>
+                  <a href="https://app.scapedatasolutions.com/sample_report.pdf" target="_blank" rel="noopener noreferrer" className={styles.ctaGhost}>
                     <Eye size={15} /> See Example Report
                   </a>
                 </motion.div>
