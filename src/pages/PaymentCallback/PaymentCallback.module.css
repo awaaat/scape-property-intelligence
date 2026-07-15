@@ -15,6 +15,7 @@
   width: 100%;
   text-align: center;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  margin-top: -64px; /* offsets the fixed header so the card sits closer to true visual center */
 }
 
 .spinner {
