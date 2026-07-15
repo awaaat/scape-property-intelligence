@@ -137,7 +137,12 @@ export default function PaymentCallback() {
         <p>{message}</p>
 
         {status === "success" && isLoggedIn() && (
-          <p className={styles.redirectNote}>Taking you to your dashboard...</p>
+          <>
+            <p className={styles.redirectNote}>Taking you to your dashboard...</p>
+            <button className={styles.dashboardBtn} onClick={() => navigate("/dashboard")}>
+              Go to Dashboard
+            </button>
+          </>
         )}
 
         {status === "success" && !isLoggedIn() && pdfUrl && (
@@ -150,7 +155,7 @@ export default function PaymentCallback() {
           <p className={styles.redirectNote}>Your report is being generated — check back shortly.</p>
         )}
 
-        {status === "success" && !isLoggedIn() && (
+        {status === "success" && (
           <button
             className={styles.dashboardBtn}
             style={{ marginTop: 12, background: "transparent", border: "1px solid currentColor" }}
