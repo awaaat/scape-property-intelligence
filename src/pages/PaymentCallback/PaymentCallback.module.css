@@ -1,10 +1,11 @@
 .callbackPage {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background-color: #f4f5f7;
   padding: 24px;
+  padding-top: 64px; /* distance below the fixed header -- lower this number to move the card further up */
 }
 
 .callbackCard {
@@ -15,7 +16,6 @@
   width: 100%;
   text-align: center;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  margin-top: -64px; /* offsets the fixed header so the card sits closer to true visual center */
 }
 
 .spinner {
