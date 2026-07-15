@@ -419,6 +419,36 @@ export default function HomePage() {
   const canvasRef = useRef(null);
   const heroRef = useRef(null);
 
+  // Types tag + headline only, restarting each time the slide changes.
+  const [tagTyped, setTagTyped] = useState("");
+  const [headlineTyped, setHeadlineTyped] = useState("");
+  const [headline2Typed, setHeadline2Typed] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setTagTyped("");
+    setHeadlineTyped("");
+    setHeadline2Typed("");
+    const typeString = (str, setter, onDone) => {
+      let i = 0;
+      const id = setInterval(() => {
+        if (cancelled) { clearInterval(id); return; }
+        i += 1;
+        setter(str.slice(0, i));
+        if (i >= str.length) {
+          clearInterval(id);
+          if (onDone) onDone();
+        }
+      }, 28);
+    };
+    typeString(SLIDES[slide].tag, setTagTyped, () => {
+      typeString(SLIDES[slide].headline, setHeadlineTyped, () => {
+        typeString(SLIDES[slide].headline2, setHeadline2Typed);
+      });
+    });
+    return () => { cancelled = true; };
+  }, [slide]);
+
   // Auto-slide effects
   useEffect(() => {
     const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 22000);
@@ -991,67 +1021,64 @@ export default function HomePage() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={`hero-${slide}`}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -40 }}
-                transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-                className={styles.heroContent}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
                 <motion.span
                   className={styles.heroTag}
-                  animate={{ 
-                    backgroundColor: `${SLIDES[slide].color}33`,
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{ scale: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
+                  animate={{ backgroundColor: `${SLIDES[slide].color}33` }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <Sparkles size={12} /> {SLIDES[slide].tag}
+                  <Sparkles size={12} /> {tagTyped}
                 </motion.span>
-                <motion.h1
+                <h1
                   className={styles.heroTitle}
-                  animate={{ marginLeft: slide === 1 ? -22 : 0 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ marginLeft: slide === 1 ? -22 : 0 }}
                 >
-                  <motion.span
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    {SLIDES[slide].headline}
-                  </motion.span>
-                  <motion.span
+                  <span>{headlineTyped}</span>
+                  <span
                     className={styles.heroTitleAccent}
                     style={{ color: SLIDES[slide].color }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    whileHover={{ scale: 1.05 }}
                   >
-                    {SLIDES[slide].headline2}
-                  </motion.span>
-                </motion.h1>
-                <motion.p 
-                  className={styles.heroSub}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  {SLIDES[slide].sub}
-                </motion.p>
+                    {headline2Typed}
+                  </span>
+                </h1>
+              </motion.div>
+            </AnimatePresence>
 
-                <motion.div 
-                  className={styles.heroSearch}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
+            <div className={styles.heroContent}>
+              <p className={styles.heroSub}>
+                Drop a pin on the map, or paste a Google Maps link. In seconds you get a plain,
+                evidence backed report on that land: what it's worth, what's nearby, and what
+                could go wrong.
+              </p>
+
+              <div className={styles.heroSearch}>
+                <motion.div
+                  style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, color: "#b5602f", fontWeight: 700, fontSize: 13, letterSpacing: 0.3 }}
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
                 >
+                  <MapPin size={14} /> Drop your pin here to get started
+                </motion.div>
                   <div className={styles.searchInput}>
                     <motion.input
                       type="text"
-                      placeholder="Paste the property's Google Maps pin (or type its address) to check it"
+                      autoFocus
+                      placeholder="Paste a Google Maps pin, or type an address, to check it now"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                      animate={{
+                        boxShadow: [
+                          "0 0 0 0 rgba(181, 96, 47, 0.35)",
+                          "0 0 0 8px rgba(181, 96, 47, 0)",
+                          "0 0 0 0 rgba(181, 96, 47, 0.35)"
+                        ]
+                      }}
+                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
                       whileFocus={{ scale: 1.02, boxShadow: "0 0 0 3px rgba(181, 96, 47, 0.2)" }}
                     />
                     <motion.button
@@ -1164,79 +1191,57 @@ export default function HomePage() {
                       </motion.div>
                     </motion.div>
                   )}
-                </motion.div>
+              </div>
 
-                <motion.div 
-                  className={styles.heroActions}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+              <div className={styles.heroActions}>
+                <motion.div
+                  whileHover={{ scale: 1.05, boxShadow: "0 12px 35px rgba(181, 96, 47, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className={styles.ctaWrapper}
                 >
-                  <motion.div
-                    whileHover={{ scale: 1.05, boxShadow: "0 12px 35px rgba(181, 96, 47, 0.4)" }}
-                    whileTap={{ scale: 0.95 }}
-                    className={styles.ctaWrapper}
-                  >
-                    <Link to="/signup" className={styles.ctaPrimary} onClick={addRipple}>
-                      {ripples.map(r => (
-                        <motion.span 
-                          key={r.id} 
-                          className={styles.ripple} 
-                          style={{ left: r.x, top: r.y }}
-                          initial={{ scale: 0, opacity: 0.6 }}
-                          animate={{ scale: 4, opacity: 0 }}
-                          transition={{ duration: 0.7 }}
-                        />
-                      ))}
-                      Start Free Trial <ArrowRight size={16} />
-                    </Link>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Link to="/property-intel" className={styles.ctaGhost}>
-                      <Eye size={15} /> See Example Report
-                    </Link>
-                  </motion.div>
-                </motion.div>
-
-                <motion.div 
-                  className={styles.heroStats}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                >
-                  {[
-                    { val: SLIDES[slide].stat.val, label: SLIDES[slide].stat.label },
-                    { val: "98%", label: "Data Accuracy" },
-                    { val: "12+", label: "Data Sources" }
-                  ].map((stat, idx) => (
-                    <motion.div 
-                      key={idx}
-                      className={styles.heroStat}
-                      whileHover={{ y: -5 }}
-                    >
+                  <a href="https://app.scapedatasolutions.com/signup" className={styles.ctaPrimary} onClick={addRipple}>
+                    {ripples.map(r => (
                       <motion.span 
-                        className={styles.heroStatVal}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.7 + idx * 0.15, type: "spring" }}
-                      >
-                        {stat.val}
-                      </motion.span>
-                      <span className={styles.heroStatLbl}>{stat.label}</span>
-                      {idx < 2 && <div className={styles.heroStatDivider} />}
-                    </motion.div>
-                  ))}
+                        key={r.id} 
+                        className={styles.ripple} 
+                        style={{ left: r.x, top: r.y }}
+                        initial={{ scale: 0, opacity: 0.6 }}
+                        animate={{ scale: 4, opacity: 0 }}
+                        transition={{ duration: 0.7 }}
+                      />
+                    ))}
+                    Start Free Trial <ArrowRight size={16} />
+                  </a>
                 </motion.div>
-
-                <motion.div 
-                  className={styles.heroControls}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
+                  <a href="https://app.scapedatasolutions.com/property-intel" className={styles.ctaGhost}>
+                    <Eye size={15} /> See Example Report
+                  </a>
+                </motion.div>
+              </div>
+
+              <div className={styles.heroStats}>
+                {[
+                  { val: "84 / 100", label: "Example plot score" },
+                  { val: "98%", label: "Data Accuracy" },
+                  { val: "12+", label: "Data Sources" }
+                ].map((stat, idx) => (
+                  <motion.div 
+                    key={idx}
+                    className={styles.heroStat}
+                    whileHover={{ y: -5 }}
+                  >
+                    <span className={styles.heroStatVal}>{stat.val}</span>
+                    <span className={styles.heroStatLbl}>{stat.label}</span>
+                    {idx < 2 && <div className={styles.heroStatDivider} />}
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className={styles.heroControls}>
                   <motion.button
                     className={styles.heroArrow}
                     onClick={() => setSlide(s => (s - 1 + SLIDES.length) % SLIDES.length)}
@@ -1260,18 +1265,17 @@ export default function HomePage() {
                       />
                     ))}
                   </div>
-                  <motion.button
-                    className={styles.heroArrow}
-                    onClick={() => setSlide(s => (s + 1) % SLIDES.length)}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="Next slide"
-                  >
-                    <ChevronRight size={16} />
-                  </motion.button>
-                </motion.div>
-              </motion.div>
-            </AnimatePresence>
+                <motion.button
+                  className={styles.heroArrow}
+                  onClick={() => setSlide(s => (s + 1) % SLIDES.length)}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Next slide"
+                >
+                  <ChevronRight size={16} />
+                </motion.button>
+              </div>
+            </div>
           </div>
         </section>
 
