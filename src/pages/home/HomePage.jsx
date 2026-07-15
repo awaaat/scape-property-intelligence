@@ -2,7 +2,7 @@
 // Scape Property Intelligence - Complete Interactive Homepage (Accordion Features)
 
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight, Award, BarChart2, BookOpen, Building2, CheckCircle,
@@ -423,6 +423,25 @@ export default function HomePage() {
 
   const canvasRef = useRef(null);
   const heroRef = useRef(null);
+  const searchBoxRef = useRef(null);
+  const location = useLocation();
+
+  // Coming back from PaymentCallback's "Submit another Request" button --
+  // scroll straight to the pin-submission hero section instead of landing
+  // at the top of the marketing page.
+  useEffect(() => {
+    if (location.state?.scrollToPin && heroRef.current) {
+      heroRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.state]);
+
+  // Nudge the page up slightly once a search starts, so the processing
+  // steps/bar that expand below the input aren't cut off below the fold.
+  useEffect(() => {
+    if (isSearching && searchBoxRef.current) {
+      searchBoxRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isSearching]);
 
   // Small, self-contained type/hold/delete loop for the hero H1 --
   // deliberately separate from the old SLIDES/22s carousel machinery
@@ -1032,7 +1051,7 @@ export default function HomePage() {
                 your dashboard uses.
               </p>
 
-              <div className={styles.heroSearch}>
+              <div className={styles.heroSearch} ref={searchBoxRef}>
                 <div className={styles.searchInput}>
                   <input
                     type="text"

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { verifyPayment, fetchReportStatus } from "../../api/billing";
 import { isLoggedIn } from "../../api/auth";
+import PageLayout from "../../components/Layout/PageLayout";
 import styles from "./PaymentCallback.module.css";
 
 // Paystack redirects back with ?reference=... or ?trxref=... depending
@@ -120,6 +121,7 @@ export default function PaymentCallback() {
   }, [reference]);
 
   return (
+    <PageLayout>
     <div className={styles.callbackPage}>
       <div className={styles.callbackCard}>
         {status === "verifying" && <div className={styles.spinner} />}
@@ -148,6 +150,16 @@ export default function PaymentCallback() {
           <p className={styles.redirectNote}>Your report is being generated — check back shortly.</p>
         )}
 
+        {status === "success" && !isLoggedIn() && (
+          <button
+            className={styles.dashboardBtn}
+            style={{ marginTop: 12, background: "transparent", border: "1px solid currentColor" }}
+            onClick={() => navigate("/", { state: { scrollToPin: true } })}
+          >
+            Submit another Request
+          </button>
+        )}
+
         {(status === "failed" || status === "timeout") && (
           <button className={styles.dashboardBtn} onClick={() => navigate("/dashboard")}>
             Go to Dashboard
@@ -155,5 +167,6 @@ export default function PaymentCallback() {
         )}
       </div>
     </div>
+    </PageLayout>
   );
 }
