@@ -4,6 +4,8 @@ import ScrollToTop from "./components/Layout/ScrollToTop";
 import HomePage from "./pages/home/HomePage";
 import SignUp from "./pages/SignUp/SignUp";
 import Login from "./pages/Login/Login";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import PaymentCallback from "./pages/PaymentCallback/PaymentCallback";
 import VerifyEmail from "./pages/VerifyEmail/VerifyEmail";
@@ -31,6 +33,8 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/payment/callback" element={<PaymentCallback />} />
         <Route path="/verify-email" element={<VerifyEmail />} />

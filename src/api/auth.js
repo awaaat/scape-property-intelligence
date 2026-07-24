@@ -40,6 +40,19 @@ export async function confirmVerification({ id, token }) {
   return data;
 }
 
+export async function requestPasswordReset(email) {
+  await client.post("/users/password-reset/request/", { email });
+}
+
+export async function confirmPasswordReset({ uid, token, newPassword }) {
+  const { data } = await client.post("/users/password-reset/confirm/", {
+    uid,
+    token,
+    new_password: newPassword,
+  });
+  return data;
+}
+
 export function isLoggedIn() {
   return Boolean(tokenStorage.getAccess());
 }
