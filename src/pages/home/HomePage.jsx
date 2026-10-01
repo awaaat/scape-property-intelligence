@@ -2028,12 +2028,6 @@ export default function HomePage() {
             <p className={styles.footContactLine}>
               <Mail size={14} /> hello@scapeintel.com
             </p>
-            <p className={styles.footContactLine}>
-              <Phone size={14} /> +1 (757) 598-0582
-            </p>
-            <p className={styles.footContactLine}>
-              <MapPin size={14} /> Nairobi, Kenya
-            </p>
             <div className={styles.footNewsletter}>
               <p>Subscribe to our newsletter</p>
               <div className={styles.footNewsletterForm}>

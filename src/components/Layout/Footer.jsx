@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail } from "lucide-react";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -33,8 +33,6 @@ export default function Footer() {
         <div>
           <h4 className={styles.footH}>Contact</h4>
           <p className={styles.footContactLine}><Mail size={14} /> info@scapedatasolutions.com</p>
-          <p className={styles.footContactLine}><Phone size={14} /> +254 718 889 559</p>
-          <p className={styles.footContactLine}><MapPin size={14} /> Nairobi, Kenya</p>
         </div>
       </div>
 

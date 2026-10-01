@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import PageLayout from "../../components/Layout/PageLayout";
 import { fadeUp, VIEWPORT } from "../../styles/animations";
 import SEO from "../../components/SEO/SEO";
@@ -46,15 +46,7 @@ export default function Contact() {
           </div>
           <div>
             <div style={{ background: "var(--bg-raised)", padding: 24, borderRadius: 12, border: "1px solid var(--hairline)", marginBottom: 24 }}>
-              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-h)", marginBottom: 12 }}>Office</h3>
-              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
-                <MapPin size={18} color="var(--text-dim)" />
-                <span>Nairobi, Kenya</span>
-              </div>
-              <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
-                <Phone size={18} color="var(--text-dim)" />
-                <span>+254 718 889 559</span>
-              </div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-h)", marginBottom: 12 }}>Email</h3>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                 <Mail size={18} color="var(--text-dim)" />
                 <span>info@scapedatasolutions.com</span>
