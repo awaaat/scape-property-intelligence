@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import PageLayout from "../../components/Layout/PageLayout";
 import { confirmVerification } from "../../api/auth";
 import styles from "./VerifyEmail.module.css";
 
 export default function VerifyEmail() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("verifying"); // verifying | success | failed
   const [message, setMessage] = useState("Confirming your email…");
@@ -26,7 +27,8 @@ export default function VerifyEmail() {
         await confirmVerification({ id, token });
         if (cancelled) return;
         setStatus("success");
-        setMessage("Your email is verified. You're all set.");
+        setMessage("Your email is verified. Taking you to sign in…");
+        setTimeout(() => { if (!cancelled) navigate("/login", { replace: true }); }, 2500);
       } catch (err) {
         if (cancelled) return;
         const detail = err.response?.data?.detail;
